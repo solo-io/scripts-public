@@ -19,6 +19,13 @@ WARN='\033[0;33m'
 ERROR='\033[0;31m'
 RESET='\033[0m'
 
+# Progress bar variables
+PROGRESS_WIDTH=50
+TOTAL_CLUSTERS=0
+TOTAL_NAMESPACES=0
+CURRENT_CLUSTER=0
+CURRENT_NAMESPACE=0
+
 log_info() {
   echo "${INFO}[INFO] $1${RESET}"
 }
@@ -29,6 +36,42 @@ log_warn() {
 
 log_error() {
   echo "${ERROR}[ERROR] $1${RESET}"
+}
+
+# Function to draw progress bar
+draw_progress_bar() {
+  local percent=$1
+  local width=$2
+  local filled=$(printf "%.0f" $(echo "$percent * $width / 100" | bc -l))
+  local empty=$((width - filled))
+  
+  # Clear the current line first
+  printf "\r\033[K"
+  printf "["
+  printf "%${filled}s" | tr ' ' '#'
+  printf "%${empty}s" | tr ' ' '-'
+  printf "] %.1f%%" "$percent"
+}
+
+# Function to update progress
+update_progress() {
+  local cluster_weight=0.3  # 30% weight for cluster progress
+  local namespace_weight=0.7  # 70% weight for namespace progress
+  
+  local cluster_progress=0
+  [ $TOTAL_CLUSTERS -gt 0 ] && cluster_progress=$(echo "scale=2; $CURRENT_CLUSTER * 100 / $TOTAL_CLUSTERS" | bc)
+  
+  local namespace_progress=0
+  [ $TOTAL_NAMESPACES -gt 0 ] && namespace_progress=$(echo "scale=2; $CURRENT_NAMESPACE * 100 / $TOTAL_NAMESPACES" | bc)
+  
+  local total_progress=$(echo "scale=2; ($cluster_progress * $cluster_weight) + ($namespace_progress * $namespace_weight)" | bc)
+  
+  # Ensure we don't exceed 100%
+  if [ $(echo "$total_progress > 100" | bc -l) -eq 1 ]; then
+    total_progress=100
+  fi
+  
+  draw_progress_bar $total_progress $PROGRESS_WIDTH
 }
 
 # check contexts input
@@ -55,7 +98,7 @@ while [ $# -gt 0 ]; do
 done
 
 # verify environment has expected tools
-expected_commands="kubectl jq wc awk sha256sum"
+expected_commands="kubectl jq wc awk sha256sum bc"
 missing_commands=""
 for cmd in $expected_commands; do
   if ! command -v "$cmd" > /dev/null; then
@@ -182,9 +225,21 @@ process_namespace_data() {
   fi
 }
 
+# Count total clusters and namespaces
+TOTAL_CLUSTERS=$(echo "$CONTEXTS" | wc -w)
+for ctx in $CONTEXTS; do
+  ns_count=$(kubectl --context="$ctx" get ns -o json | \
+    jq -r '[.items[] | select((.metadata.labels["istio-injection"] == "enabled") or (.metadata.labels["istio.io/rev"] != null)) | .metadata.name] | length')
+  TOTAL_NAMESPACES=$((TOTAL_NAMESPACES + ns_count))
+done
+
+log_info "Found $TOTAL_CLUSTERS clusters with a total of $TOTAL_NAMESPACES namespaces to process"
+
 # Loop over each context provided
 for ctx in $CONTEXTS; do
+  echo # Add a newline before each cluster to ensure clean output
   log_info "Processing context: $ctx"
+  update_progress
 
   out_ctx=$ctx
   if [ "$OBFUSCATE_CLUSTER_NAMES" = true ]; then
@@ -200,18 +255,26 @@ for ctx in $CONTEXTS; do
 
   if [ -z "$namespaces" ]; then
     log_warn "No namespaces with istio injection found in context $ctx"
+    CURRENT_CLUSTER=$((CURRENT_CLUSTER + 1))
+    update_progress
     continue
   fi
 
   # Process each namespace
   while IFS= read -r ns_name; do    
     process_namespace_data "$ns_name" "$ctx" "$out_ctx"
+    CURRENT_NAMESPACE=$((CURRENT_NAMESPACE + 1))
+    update_progress
   done <<< "$namespaces"
 
   # Process node information (single call)
   node_count=$(kubectl --context="$ctx" get nodes --no-headers 2>/dev/null | wc -l)
   jq --arg ctx "$out_ctx" --argjson count "$node_count" \
     '.[$ctx].nodes = $count' cluster_info.json > tmp.json && mv tmp.json cluster_info.json
+
+  CURRENT_CLUSTER=$((CURRENT_CLUSTER + 1))
+  update_progress
 done
 
+echo # New line after progress bar
 log_info "Data collection complete. Output file: cluster_info.json"
