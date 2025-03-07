@@ -75,7 +75,6 @@ update_progress() {
 }
 
 # check contexts input
-# TODO: Update - v1/MVP will only support a single context
 if [ -z "$CONTEXTS" ]; then
   log_error "Please set the CONTEXTS environment variable to a space-separated list of kube contexts."
   exit 1
