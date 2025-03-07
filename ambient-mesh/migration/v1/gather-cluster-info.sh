@@ -256,6 +256,7 @@ process_namespace_data() {
   local ctx="$2"
   local out_ctx="$3"
   local has_metrics="$4"
+  local is_istio_injected="$5"
 
   out_ns_name=$ns_name
   if [ "$OBFUSCATE_NAMES" = true ]; then
@@ -311,8 +312,8 @@ process_namespace_data() {
     fi
   fi
 
-  # Istio containers resources
-  if [ "$istio_containers" -gt 0 ]; then
+  # Istio containers resources (only if namespace has Istio injection)
+  if [ "$is_istio_injected" = "true" ] && [ "$istio_containers" -gt 0 ]; then
     istio_cpu=$(jq "${parse_cpu_cmd} ([.[] | .spec.containers[]? | select(.name == \"istio-proxy\") | .resources.requests.cpu? | select(. != null) | parse_cpu] | add // 0)" <<< "$pods_json")
     istio_mem=$(jq "${parse_mem_cmd} ([.[] | .spec.containers[]? | select(.name == \"istio-proxy\") | .resources.requests.memory? | select(. != null) | parse_mem] | add // 0) / (1024 * 1024 * 1024)" <<< "$pods_json")
     
@@ -330,6 +331,7 @@ process_namespace_data() {
   # Build the base jq filter
   jq_filter='{
     pods: $pods,
+    is_istio_injected: $is_istio_injected,
     resources: {
       regular: {
         containers: $reg_containers,
@@ -337,31 +339,21 @@ process_namespace_data() {
           cpu: $reg_cpu,
           memory_gb: $reg_mem
         }
-      },
-      istio: {
-        containers: $istio_containers,
-        request: {
-          cpu: $istio_cpu,
-          memory_gb: $istio_mem
-        }
       }
     }
   }'
 
-  # If metrics are available, add actual usage to the filter
-  if [ "$has_metrics" = true ]; then
+  # If namespace has Istio injection, add Istio resources
+  if [ "$is_istio_injected" = "true" ]; then
     jq_filter='{
       pods: $pods,
+      is_istio_injected: $is_istio_injected,
       resources: {
         regular: {
           containers: $reg_containers,
           request: {
             cpu: $reg_cpu,
             memory_gb: $reg_mem
-          },
-          actual: {
-            cpu: $reg_cpu_actual,
-            memory_gb: $reg_mem_actual
           }
         },
         istio: {
@@ -369,19 +361,68 @@ process_namespace_data() {
           request: {
             cpu: $istio_cpu,
             memory_gb: $istio_mem
-          },
-          actual: {
-            cpu: $istio_cpu_actual,
-            memory_gb: $istio_mem_actual
           }
         }
       }
     }'
   fi
 
+  # If metrics are available, add actual usage to the filter
+  if [ "$has_metrics" = true ]; then
+    if [ "$is_istio_injected" = "true" ]; then
+      jq_filter='{
+        pods: $pods,
+        is_istio_injected: $is_istio_injected,
+        resources: {
+          regular: {
+            containers: $reg_containers,
+            request: {
+              cpu: $reg_cpu,
+              memory_gb: $reg_mem
+            },
+            actual: {
+              cpu: $reg_cpu_actual,
+              memory_gb: $reg_mem_actual
+            }
+          },
+          istio: {
+            containers: $istio_containers,
+            request: {
+              cpu: $istio_cpu,
+              memory_gb: $istio_mem
+            },
+            actual: {
+              cpu: $istio_cpu_actual,
+              memory_gb: $istio_mem_actual
+            }
+          }
+        }
+      }'
+    else
+      jq_filter='{
+        pods: $pods,
+        is_istio_injected: $is_istio_injected,
+        resources: {
+          regular: {
+            containers: $reg_containers,
+            request: {
+              cpu: $reg_cpu,
+              memory_gb: $reg_mem
+            },
+            actual: {
+              cpu: $reg_cpu_actual,
+              memory_gb: $reg_mem_actual
+            }
+          }
+        }
+      }'
+    fi
+  fi
+
   # Use jq to construct the metrics object
   metrics=$(jq -n \
     --argjson pods "$pod_count" \
+    --argjson is_istio_injected "$is_istio_injected" \
     --argjson reg_containers "$regular_containers" \
     --argjson reg_cpu "$regular_cpu" \
     --argjson reg_mem "$regular_mem" \
@@ -412,12 +453,11 @@ process_namespace_data() {
 # Count total clusters and namespaces
 TOTAL_CLUSTERS=$(echo "$CONTEXTS" | wc -w)
 for ctx in $CONTEXTS; do
-  ns_count=$(kubectl --context="$ctx" get ns -o json | \
-    jq -r '[.items[] | select((.metadata.labels["istio-injection"] == "enabled") or (.metadata.labels["istio.io/rev"] != null)) | .metadata.name] | length')
+  ns_count=$(kubectl --context="$ctx" get ns -o json | jq -r '.items[] | .metadata.name' | wc -l)
   TOTAL_NAMESPACES=$((TOTAL_NAMESPACES + ns_count))
 done
 
-log_info "Found $TOTAL_CLUSTERS clusters with a total of $TOTAL_NAMESPACES namespaces to process"
+log_info "Found $TOTAL_CLUSTERS cluster(s) with a total of $TOTAL_NAMESPACES namespace(s) to process"
 
 for ctx in $CONTEXTS; do
   echo
@@ -459,10 +499,10 @@ for ctx in $CONTEXTS; do
 
   # Cache namespaces with istio injection
   namespaces=$(kubectl --context="$ctx" get ns -o json | \
-    jq -r '.items[] | select((.metadata.labels["istio-injection"] == "enabled") or (.metadata.labels["istio.io/rev"] != null)) | .metadata.name')
+    jq -r '.items[] | .metadata.name')
 
   if [ -z "$namespaces" ]; then
-    log_warn "No namespaces with istio injection found in context $ctx"
+    log_warn "No namespaces found in context $ctx"
     CURRENT_CLUSTER=$((CURRENT_CLUSTER + 1))
     continue
   fi
@@ -474,7 +514,11 @@ for ctx in $CONTEXTS; do
 
   # Process each namespace
   while IFS= read -r ns_name; do
-    process_namespace_data "$ns_name" "$ctx" "$out_ctx" "$has_metrics"
+    # Check if namespace has Istio injection
+    is_istio_injected=$(kubectl --context="$ctx" get ns "$ns_name" -o json | \
+      jq -r '(.metadata.labels["istio-injection"] == "enabled") or (.metadata.labels["istio.io/rev"] != null)')
+    
+    process_namespace_data "$ns_name" "$ctx" "$out_ctx" "$has_metrics" "$is_istio_injected"
     CURRENT_NAMESPACE=$((CURRENT_NAMESPACE + 1))
     update_progress
   done <<< "$namespaces"
