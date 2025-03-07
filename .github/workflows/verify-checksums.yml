@@ -1,7 +1,9 @@
 name: Verify Checksums
 on:
-  push: {}
   pull_request: {}
+  push:
+    branches:
+      - main
 
 jobs:
   verify-checksums:
