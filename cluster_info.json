@@ -1,374 +1,2761 @@
 {
-  "kind-cluster-1": {
-    "namespaces": {
-      "bookinfo": {
-        "pods": 6,
-        "is_istio_injected": true,
-        "resources": {
-          "regular": {
-            "containers": 14,
-            "request": {
-              "cpu": 0,
-              "memory_gb": 0.25
-            },
-            "actual": {
-              "cpu": 0.07143501000000001,
-              "memory_gb": 0.925079345703125
-            }
-          },
-          "istio": {
-            "containers": 6,
-            "request": {
-              "cpu": 0,
-              "memory_gb": 0.75
-            },
-            "actual": {
-              "cpu": 0.018083639,
-              "memory_gb": 0.3164825439453125
-            }
-          }
-        }
-      },
-      "cert-manager": {
-        "pods": 3,
-        "is_istio_injected": false,
-        "resources": {
-          "regular": {
-            "containers": 3,
-            "request": {
-              "cpu": 0,
-              "memory_gb": 0
-            },
-            "actual": {
-              "cpu": 0.005390771,
-              "memory_gb": 0.08676910400390625
-            }
-          }
-        }
-      },
-      "default": {
-        "pods": 2,
-        "is_istio_injected": false,
-        "resources": {
-          "regular": {
-            "containers": 2,
-            "request": {
-              "cpu": 0,
-              "memory_gb": 0
-            },
-            "actual": {
-              "cpu": 0.000144084,
-              "memory_gb": 0.0322265625
-            }
-          }
-        }
-      },
-      "gloo-mesh": {
-        "pods": 2,
-        "is_istio_injected": false,
-        "resources": {
-          "regular": {
-            "containers": 2,
-            "request": {
-              "cpu": 0.15000000000000002,
-              "memory_gb": 0.41796875
-            },
-            "actual": {
-              "cpu": 0.068819434,
-              "memory_gb": 0.3127632141113281
-            }
-          }
-        }
-      },
-      "gloo-mesh-addons": {
-        "pods": 3,
-        "is_istio_injected": true,
-        "resources": {
-          "regular": {
-            "containers": 4,
-            "request": {
-              "cpu": 0.30000000000000004,
-              "memory_gb": 0.75
-            },
-            "actual": {
-              "cpu": 0.008600138,
-              "memory_gb": 0.13899612426757812
-            }
-          },
-          "istio": {
-            "containers": 3,
-            "request": {
-              "cpu": 0,
-              "memory_gb": 0.375
-            },
-            "actual": {
-              "cpu": 0.009568755,
-              "memory_gb": 0.14905548095703125
-            }
-          }
-        }
-      },
-      "helloworld": {
-        "pods": 2,
-        "is_istio_injected": true,
-        "resources": {
-          "regular": {
-            "containers": 6,
-            "request": {
-              "cpu": 0,
-              "memory_gb": 0
-            },
-            "actual": {
-              "cpu": 0.00987999,
-              "memory_gb": 0.08415985107421875
-            }
-          },
-          "istio": {
-            "containers": 2,
-            "request": {
-              "cpu": 0,
-              "memory_gb": 0.25
-            },
-            "actual": {
-              "cpu": 0.007618077,
-              "memory_gb": 0.0933990478515625
-            }
-          }
-        }
-      },
-      "httpbin": {
-        "pods": 1,
-        "is_istio_injected": true,
-        "resources": {
-          "regular": {
-            "containers": 3,
-            "request": {
-              "cpu": 0,
-              "memory_gb": 0
-            },
-            "actual": {
-              "cpu": 0,
-              "memory_gb": 0.00322723388671875
-            }
-          },
-          "istio": {
-            "containers": 1,
-            "request": {
-              "cpu": 0,
-              "memory_gb": 0.125
-            },
-            "actual": {
-              "cpu": 0.003118251,
-              "memory_gb": 0.052581787109375
-            }
-          }
-        }
-      },
-      "istio-gateway-egress": {
-        "pods": 1,
-        "is_istio_injected": false,
-        "resources": {
-          "regular": {
-            "containers": 0,
-            "request": {
-              "cpu": 0,
-              "memory_gb": 0
-            },
-            "actual": {
-              "cpu": 0,
-              "memory_gb": 0
-            }
-          }
-        }
-      },
-      "istio-gateway-ew": {
-        "pods": 1,
-        "is_istio_injected": false,
-        "resources": {
-          "regular": {
-            "containers": 0,
-            "request": {
-              "cpu": 0,
-              "memory_gb": 0
-            },
-            "actual": {
-              "cpu": 0,
-              "memory_gb": 0
-            }
-          }
-        }
-      },
-      "istio-gateway-internal": {
-        "pods": 1,
-        "is_istio_injected": false,
-        "resources": {
-          "regular": {
-            "containers": 0,
-            "request": {
-              "cpu": 0,
-              "memory_gb": 0
-            },
-            "actual": {
-              "cpu": 0,
-              "memory_gb": 0
-            }
-          }
-        }
-      },
-      "istio-gateway-ns": {
-        "pods": 1,
-        "is_istio_injected": false,
-        "resources": {
-          "regular": {
-            "containers": 0,
-            "request": {
-              "cpu": 0,
-              "memory_gb": 0
-            },
-            "actual": {
-              "cpu": 0,
-              "memory_gb": 0
-            }
-          }
-        }
-      },
-      "istio-system": {
-        "pods": 1,
-        "is_istio_injected": false,
-        "resources": {
-          "regular": {
-            "containers": 1,
-            "request": {
-              "cpu": 0.3,
-              "memory_gb": 2
-            },
-            "actual": {
-              "cpu": 0.002950953,
-              "memory_gb": 0.09511184692382812
-            }
-          }
-        }
-      },
-      "kube-node-lease": {
-        "pods": 0,
-        "is_istio_injected": false,
-        "resources": {
-          "regular": {
-            "containers": 0,
-            "request": {
-              "cpu": 0,
-              "memory_gb": 0
-            },
-            "actual": {
-              "cpu": 0,
-              "memory_gb": 0
-            }
-          }
-        }
-      },
-      "kube-public": {
-        "pods": 0,
-        "is_istio_injected": false,
-        "resources": {
-          "regular": {
-            "containers": 0,
-            "request": {
-              "cpu": 0,
-              "memory_gb": 0
-            },
-            "actual": {
-              "cpu": 0,
-              "memory_gb": 0
-            }
-          }
-        }
-      },
-      "kube-system": {
-        "pods": 9,
-        "is_istio_injected": false,
-        "resources": {
-          "regular": {
-            "containers": 9,
-            "request": {
-              "cpu": 1.05,
-              "memory_gb": 0.478515625
-            },
-            "actual": {
-              "cpu": 0.18057771399999997,
-              "memory_gb": 1.3880996704101562
-            }
-          }
-        }
-      },
-      "local-path-storage": {
-        "pods": 1,
-        "is_istio_injected": false,
-        "resources": {
-          "regular": {
-            "containers": 1,
-            "request": {
-              "cpu": 0,
-              "memory_gb": 0
-            },
-            "actual": {
-              "cpu": 0.000641975,
-              "memory_gb": 0.0194091796875
-            }
-          }
-        }
-      },
-      "metrics-generator": {
-        "pods": 0,
-        "is_istio_injected": false,
-        "resources": {
-          "regular": {
-            "containers": 0,
-            "request": {
-              "cpu": 0,
-              "memory_gb": 0
-            },
-            "actual": {
-              "cpu": 0,
-              "memory_gb": 0
-            }
-          }
-        }
-      },
-      "not-in-mesh": {
-        "pods": 1,
-        "is_istio_injected": false,
-        "resources": {
-          "regular": {
-            "containers": 1,
-            "request": {
-              "cpu": 0,
-              "memory_gb": 0
-            },
-            "actual": {
-              "cpu": 0.000079162,
-              "memory_gb": 0.000179290771484375
-            }
-          }
-        }
-      }
-    },
-    "nodes": {
-      "cluster-1-control-plane": {
-        "instance_type": "unknown",
-        "region": "us-east",
-        "zone": "us-east-1c",
-        "resources": {
-          "capacity": {
-            "cpu": 10,
-            "memory_gb": 46.96571350097656
+  "name": "kind-ambient-cost",
+  "namespaces": {
+    "default": {
+      "pods": 0,
+      "is_istio_injected": false,
+      "resources": {
+        "regular": {
+          "containers": 0,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
           },
           "actual": {
-            "cpu": 0.669360803,
-            "memory_gb": 4.507911682128906
+            "cpu": 0,
+            "memory_gb": 0
           }
         }
       }
     },
-    "has_metrics": true
-  }
+    "demo-1": {
+      "pods": 2,
+      "is_istio_injected": true,
+      "resources": {
+        "regular": {
+          "containers": 2,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.016002655029296875
+          }
+        },
+        "istio": {
+          "containers": 2,
+          "request": {
+            "cpu": 0.02,
+            "memory_gb": 0.078125
+          },
+          "actual": {
+            "cpu": 0.00518038,
+            "memory_gb": 0.20697402954101562
+          }
+        }
+      }
+    },
+    "demo-10": {
+      "pods": 3,
+      "is_istio_injected": true,
+      "resources": {
+        "regular": {
+          "containers": 3,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.024158477783203125
+          }
+        },
+        "istio": {
+          "containers": 3,
+          "request": {
+            "cpu": 0.03,
+            "memory_gb": 0.1171875
+          },
+          "actual": {
+            "cpu": 0.007691885,
+            "memory_gb": 0.3167381286621094
+          }
+        }
+      }
+    },
+    "demo-100": {
+      "pods": 5,
+      "is_istio_injected": false,
+      "resources": {
+        "regular": {
+          "containers": 5,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.04034423828125
+          }
+        }
+      }
+    },
+    "demo-11": {
+      "pods": 1,
+      "is_istio_injected": true,
+      "resources": {
+        "regular": {
+          "containers": 1,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.008026123046875
+          }
+        },
+        "istio": {
+          "containers": 1,
+          "request": {
+            "cpu": 0.01,
+            "memory_gb": 0.0390625
+          },
+          "actual": {
+            "cpu": 0.002300755,
+            "memory_gb": 0.0994110107421875
+          }
+        }
+      }
+    },
+    "demo-12": {
+      "pods": 3,
+      "is_istio_injected": true,
+      "resources": {
+        "regular": {
+          "containers": 3,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.024204254150390625
+          }
+        },
+        "istio": {
+          "containers": 3,
+          "request": {
+            "cpu": 0.03,
+            "memory_gb": 0.1171875
+          },
+          "actual": {
+            "cpu": 0.006955352,
+            "memory_gb": 0.3017425537109375
+          }
+        }
+      }
+    },
+    "demo-13": {
+      "pods": 3,
+      "is_istio_injected": true,
+      "resources": {
+        "regular": {
+          "containers": 3,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.024143218994140625
+          }
+        },
+        "istio": {
+          "containers": 3,
+          "request": {
+            "cpu": 0.03,
+            "memory_gb": 0.1171875
+          },
+          "actual": {
+            "cpu": 0.007088941,
+            "memory_gb": 0.2977409362792969
+          }
+        }
+      }
+    },
+    "demo-14": {
+      "pods": 1,
+      "is_istio_injected": true,
+      "resources": {
+        "regular": {
+          "containers": 1,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.007999420166015625
+          }
+        },
+        "istio": {
+          "containers": 1,
+          "request": {
+            "cpu": 0.01,
+            "memory_gb": 0.0390625
+          },
+          "actual": {
+            "cpu": 0.002309673,
+            "memory_gb": 0.10207748413085938
+          }
+        }
+      }
+    },
+    "demo-15": {
+      "pods": 3,
+      "is_istio_injected": true,
+      "resources": {
+        "regular": {
+          "containers": 3,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.0240631103515625
+          }
+        },
+        "istio": {
+          "containers": 3,
+          "request": {
+            "cpu": 0.03,
+            "memory_gb": 0.1171875
+          },
+          "actual": {
+            "cpu": 0.006822952,
+            "memory_gb": 0.3056907653808594
+          }
+        }
+      }
+    },
+    "demo-16": {
+      "pods": 2,
+      "is_istio_injected": true,
+      "resources": {
+        "regular": {
+          "containers": 2,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.01613616943359375
+          }
+        },
+        "istio": {
+          "containers": 2,
+          "request": {
+            "cpu": 0.02,
+            "memory_gb": 0.078125
+          },
+          "actual": {
+            "cpu": 0.005298176,
+            "memory_gb": 0.20108795166015625
+          }
+        }
+      }
+    },
+    "demo-17": {
+      "pods": 3,
+      "is_istio_injected": false,
+      "resources": {
+        "regular": {
+          "containers": 3,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.024097442626953125
+          }
+        }
+      }
+    },
+    "demo-18": {
+      "pods": 5,
+      "is_istio_injected": true,
+      "resources": {
+        "regular": {
+          "containers": 5,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.040500640869140625
+          }
+        },
+        "istio": {
+          "containers": 5,
+          "request": {
+            "cpu": 0.05,
+            "memory_gb": 0.1953125
+          },
+          "actual": {
+            "cpu": 0.012101296,
+            "memory_gb": 0.5025749206542969
+          }
+        }
+      }
+    },
+    "demo-19": {
+      "pods": 1,
+      "is_istio_injected": true,
+      "resources": {
+        "regular": {
+          "containers": 1,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.0080413818359375
+          }
+        },
+        "istio": {
+          "containers": 1,
+          "request": {
+            "cpu": 0.01,
+            "memory_gb": 0.0390625
+          },
+          "actual": {
+            "cpu": 0.002356396,
+            "memory_gb": 0.09888458251953125
+          }
+        }
+      }
+    },
+    "demo-2": {
+      "pods": 3,
+      "is_istio_injected": true,
+      "resources": {
+        "regular": {
+          "containers": 3,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.02423095703125
+          }
+        },
+        "istio": {
+          "containers": 3,
+          "request": {
+            "cpu": 0.03,
+            "memory_gb": 0.1171875
+          },
+          "actual": {
+            "cpu": 0.007274404,
+            "memory_gb": 0.3074607849121094
+          }
+        }
+      }
+    },
+    "demo-20": {
+      "pods": 0,
+      "is_istio_injected": true,
+      "resources": {
+        "regular": {
+          "containers": 0,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0
+          }
+        },
+        "istio": {
+          "containers": 0,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0
+          }
+        }
+      }
+    },
+    "demo-21": {
+      "pods": 4,
+      "is_istio_injected": true,
+      "resources": {
+        "regular": {
+          "containers": 4,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.032512664794921875
+          }
+        },
+        "istio": {
+          "containers": 4,
+          "request": {
+            "cpu": 0.04,
+            "memory_gb": 0.15625
+          },
+          "actual": {
+            "cpu": 0.008607159999999999,
+            "memory_gb": 0.4124717712402344
+          }
+        }
+      }
+    },
+    "demo-22": {
+      "pods": 3,
+      "is_istio_injected": true,
+      "resources": {
+        "regular": {
+          "containers": 3,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.02400970458984375
+          }
+        },
+        "istio": {
+          "containers": 3,
+          "request": {
+            "cpu": 0.03,
+            "memory_gb": 0.1171875
+          },
+          "actual": {
+            "cpu": 0.0072925279999999995,
+            "memory_gb": 0.2955665588378906
+          }
+        }
+      }
+    },
+    "demo-23": {
+      "pods": 2,
+      "is_istio_injected": true,
+      "resources": {
+        "regular": {
+          "containers": 2,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.01601409912109375
+          }
+        },
+        "istio": {
+          "containers": 2,
+          "request": {
+            "cpu": 0.02,
+            "memory_gb": 0.078125
+          },
+          "actual": {
+            "cpu": 0.004465371,
+            "memory_gb": 0.20117950439453125
+          }
+        }
+      }
+    },
+    "demo-24": {
+      "pods": 2,
+      "is_istio_injected": false,
+      "resources": {
+        "regular": {
+          "containers": 2,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.01601409912109375
+          }
+        }
+      }
+    },
+    "demo-25": {
+      "pods": 1,
+      "is_istio_injected": true,
+      "resources": {
+        "regular": {
+          "containers": 1,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.00798797607421875
+          }
+        },
+        "istio": {
+          "containers": 1,
+          "request": {
+            "cpu": 0.01,
+            "memory_gb": 0.0390625
+          },
+          "actual": {
+            "cpu": 0.002433729,
+            "memory_gb": 0.09868240356445312
+          }
+        }
+      }
+    },
+    "demo-26": {
+      "pods": 1,
+      "is_istio_injected": true,
+      "resources": {
+        "regular": {
+          "containers": 1,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.008045196533203125
+          }
+        },
+        "istio": {
+          "containers": 1,
+          "request": {
+            "cpu": 0.01,
+            "memory_gb": 0.0390625
+          },
+          "actual": {
+            "cpu": 0.002144243,
+            "memory_gb": 0.09557723999023438
+          }
+        }
+      }
+    },
+    "demo-27": {
+      "pods": 1,
+      "is_istio_injected": false,
+      "resources": {
+        "regular": {
+          "containers": 1,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.008045196533203125
+          }
+        }
+      }
+    },
+    "demo-28": {
+      "pods": 4,
+      "is_istio_injected": true,
+      "resources": {
+        "regular": {
+          "containers": 4,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.032382965087890625
+          }
+        },
+        "istio": {
+          "containers": 4,
+          "request": {
+            "cpu": 0.04,
+            "memory_gb": 0.15625
+          },
+          "actual": {
+            "cpu": 0.009776967,
+            "memory_gb": 0.39202117919921875
+          }
+        }
+      }
+    },
+    "demo-29": {
+      "pods": 0,
+      "is_istio_injected": true,
+      "resources": {
+        "regular": {
+          "containers": 0,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0
+          }
+        },
+        "istio": {
+          "containers": 0,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0
+          }
+        }
+      }
+    },
+    "demo-3": {
+      "pods": 3,
+      "is_istio_injected": true,
+      "resources": {
+        "regular": {
+          "containers": 3,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.024303436279296875
+          }
+        },
+        "istio": {
+          "containers": 3,
+          "request": {
+            "cpu": 0.03,
+            "memory_gb": 0.1171875
+          },
+          "actual": {
+            "cpu": 0.0075123659999999995,
+            "memory_gb": 0.2975807189941406
+          }
+        }
+      }
+    },
+    "demo-30": {
+      "pods": 1,
+      "is_istio_injected": true,
+      "resources": {
+        "regular": {
+          "containers": 1,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.0080413818359375
+          }
+        },
+        "istio": {
+          "containers": 1,
+          "request": {
+            "cpu": 0.01,
+            "memory_gb": 0.0390625
+          },
+          "actual": {
+            "cpu": 0.002425186,
+            "memory_gb": 0.10031890869140625
+          }
+        }
+      }
+    },
+    "demo-31": {
+      "pods": 4,
+      "is_istio_injected": true,
+      "resources": {
+        "regular": {
+          "containers": 4,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.032390594482421875
+          }
+        },
+        "istio": {
+          "containers": 4,
+          "request": {
+            "cpu": 0.04,
+            "memory_gb": 0.15625
+          },
+          "actual": {
+            "cpu": 0.009298257,
+            "memory_gb": 0.4037284851074219
+          }
+        }
+      }
+    },
+    "demo-32": {
+      "pods": 4,
+      "is_istio_injected": true,
+      "resources": {
+        "regular": {
+          "containers": 4,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.03217315673828125
+          }
+        },
+        "istio": {
+          "containers": 4,
+          "request": {
+            "cpu": 0.04,
+            "memory_gb": 0.15625
+          },
+          "actual": {
+            "cpu": 0.00956919,
+            "memory_gb": 0.4063987731933594
+          }
+        }
+      }
+    },
+    "demo-33": {
+      "pods": 4,
+      "is_istio_injected": true,
+      "resources": {
+        "regular": {
+          "containers": 4,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.0324249267578125
+          }
+        },
+        "istio": {
+          "containers": 4,
+          "request": {
+            "cpu": 0.04,
+            "memory_gb": 0.15625
+          },
+          "actual": {
+            "cpu": 0.009377825,
+            "memory_gb": 0.439727783203125
+          }
+        }
+      }
+    },
+    "demo-34": {
+      "pods": 3,
+      "is_istio_injected": true,
+      "resources": {
+        "regular": {
+          "containers": 3,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.024173736572265625
+          }
+        },
+        "istio": {
+          "containers": 3,
+          "request": {
+            "cpu": 0.03,
+            "memory_gb": 0.1171875
+          },
+          "actual": {
+            "cpu": 0.007148334,
+            "memory_gb": 0.2959938049316406
+          }
+        }
+      }
+    },
+    "demo-35": {
+      "pods": 4,
+      "is_istio_injected": true,
+      "resources": {
+        "regular": {
+          "containers": 4,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.03228759765625
+          }
+        },
+        "istio": {
+          "containers": 4,
+          "request": {
+            "cpu": 0.04,
+            "memory_gb": 0.15625
+          },
+          "actual": {
+            "cpu": 0.009139328,
+            "memory_gb": 0.39936065673828125
+          }
+        }
+      }
+    },
+    "demo-36": {
+      "pods": 4,
+      "is_istio_injected": true,
+      "resources": {
+        "regular": {
+          "containers": 4,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.0323638916015625
+          }
+        },
+        "istio": {
+          "containers": 4,
+          "request": {
+            "cpu": 0.04,
+            "memory_gb": 0.15625
+          },
+          "actual": {
+            "cpu": 0.009698463,
+            "memory_gb": 0.39499664306640625
+          }
+        }
+      }
+    },
+    "demo-37": {
+      "pods": 4,
+      "is_istio_injected": true,
+      "resources": {
+        "regular": {
+          "containers": 4,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.03221893310546875
+          }
+        },
+        "istio": {
+          "containers": 4,
+          "request": {
+            "cpu": 0.04,
+            "memory_gb": 0.15625
+          },
+          "actual": {
+            "cpu": 0.008865453,
+            "memory_gb": 0.39986419677734375
+          }
+        }
+      }
+    },
+    "demo-38": {
+      "pods": 1,
+      "is_istio_injected": true,
+      "resources": {
+        "regular": {
+          "containers": 1,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.008083343505859375
+          }
+        },
+        "istio": {
+          "containers": 1,
+          "request": {
+            "cpu": 0.01,
+            "memory_gb": 0.0390625
+          },
+          "actual": {
+            "cpu": 0.002295568,
+            "memory_gb": 0.10416793823242188
+          }
+        }
+      }
+    },
+    "demo-39": {
+      "pods": 4,
+      "is_istio_injected": false,
+      "resources": {
+        "regular": {
+          "containers": 4,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.032222747802734375
+          }
+        }
+      }
+    },
+    "demo-4": {
+      "pods": 3,
+      "is_istio_injected": true,
+      "resources": {
+        "regular": {
+          "containers": 3,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.024097442626953125
+          }
+        },
+        "istio": {
+          "containers": 3,
+          "request": {
+            "cpu": 0.03,
+            "memory_gb": 0.1171875
+          },
+          "actual": {
+            "cpu": 0.007202836000000001,
+            "memory_gb": 0.3110847473144531
+          }
+        }
+      }
+    },
+    "demo-40": {
+      "pods": 4,
+      "is_istio_injected": true,
+      "resources": {
+        "regular": {
+          "containers": 4,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.032276153564453125
+          }
+        },
+        "istio": {
+          "containers": 4,
+          "request": {
+            "cpu": 0.04,
+            "memory_gb": 0.15625
+          },
+          "actual": {
+            "cpu": 0.009564528999999999,
+            "memory_gb": 0.40801239013671875
+          }
+        }
+      }
+    },
+    "demo-41": {
+      "pods": 1,
+      "is_istio_injected": true,
+      "resources": {
+        "regular": {
+          "containers": 1,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.008129119873046875
+          }
+        },
+        "istio": {
+          "containers": 1,
+          "request": {
+            "cpu": 0.01,
+            "memory_gb": 0.0390625
+          },
+          "actual": {
+            "cpu": 0.002122711,
+            "memory_gb": 0.0997467041015625
+          }
+        }
+      }
+    },
+    "demo-42": {
+      "pods": 2,
+      "is_istio_injected": false,
+      "resources": {
+        "regular": {
+          "containers": 2,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.026149749755859375
+          }
+        }
+      }
+    },
+    "demo-43": {
+      "pods": 5,
+      "is_istio_injected": true,
+      "resources": {
+        "regular": {
+          "containers": 5,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.04034423828125
+          }
+        },
+        "istio": {
+          "containers": 5,
+          "request": {
+            "cpu": 0.05,
+            "memory_gb": 0.1953125
+          },
+          "actual": {
+            "cpu": 0.011908247,
+            "memory_gb": 0.5054969787597656
+          }
+        }
+      }
+    },
+    "demo-44": {
+      "pods": 1,
+      "is_istio_injected": true,
+      "resources": {
+        "regular": {
+          "containers": 1,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.00800323486328125
+          }
+        },
+        "istio": {
+          "containers": 1,
+          "request": {
+            "cpu": 0.01,
+            "memory_gb": 0.0390625
+          },
+          "actual": {
+            "cpu": 0.002177079,
+            "memory_gb": 0.10159683227539062
+          }
+        }
+      }
+    },
+    "demo-45": {
+      "pods": 4,
+      "is_istio_injected": true,
+      "resources": {
+        "regular": {
+          "containers": 4,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.032413482666015625
+          }
+        },
+        "istio": {
+          "containers": 4,
+          "request": {
+            "cpu": 0.04,
+            "memory_gb": 0.15625
+          },
+          "actual": {
+            "cpu": 0.009072151,
+            "memory_gb": 0.39447784423828125
+          }
+        }
+      }
+    },
+    "demo-46": {
+      "pods": 0,
+      "is_istio_injected": false,
+      "resources": {
+        "regular": {
+          "containers": 0,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0
+          }
+        }
+      }
+    },
+    "demo-47": {
+      "pods": 1,
+      "is_istio_injected": true,
+      "resources": {
+        "regular": {
+          "containers": 1,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.00804901123046875
+          }
+        },
+        "istio": {
+          "containers": 1,
+          "request": {
+            "cpu": 0.01,
+            "memory_gb": 0.0390625
+          },
+          "actual": {
+            "cpu": 0.002355008,
+            "memory_gb": 0.09473419189453125
+          }
+        }
+      }
+    },
+    "demo-48": {
+      "pods": 1,
+      "is_istio_injected": true,
+      "resources": {
+        "regular": {
+          "containers": 1,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.008087158203125
+          }
+        },
+        "istio": {
+          "containers": 1,
+          "request": {
+            "cpu": 0.01,
+            "memory_gb": 0.0390625
+          },
+          "actual": {
+            "cpu": 0.002434872,
+            "memory_gb": 0.09926986694335938
+          }
+        }
+      }
+    },
+    "demo-49": {
+      "pods": 4,
+      "is_istio_injected": true,
+      "resources": {
+        "regular": {
+          "containers": 4,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.03234100341796875
+          }
+        },
+        "istio": {
+          "containers": 4,
+          "request": {
+            "cpu": 0.04,
+            "memory_gb": 0.15625
+          },
+          "actual": {
+            "cpu": 0.009317915,
+            "memory_gb": 0.3938560485839844
+          }
+        }
+      }
+    },
+    "demo-5": {
+      "pods": 4,
+      "is_istio_injected": false,
+      "resources": {
+        "regular": {
+          "containers": 4,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.042552947998046875
+          }
+        }
+      }
+    },
+    "demo-50": {
+      "pods": 2,
+      "is_istio_injected": true,
+      "resources": {
+        "regular": {
+          "containers": 2,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.01601409912109375
+          }
+        },
+        "istio": {
+          "containers": 2,
+          "request": {
+            "cpu": 0.02,
+            "memory_gb": 0.078125
+          },
+          "actual": {
+            "cpu": 0.003750386,
+            "memory_gb": 0.20702362060546875
+          }
+        }
+      }
+    },
+    "demo-51": {
+      "pods": 3,
+      "is_istio_injected": true,
+      "resources": {
+        "regular": {
+          "containers": 3,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.024135589599609375
+          }
+        },
+        "istio": {
+          "containers": 3,
+          "request": {
+            "cpu": 0.03,
+            "memory_gb": 0.1171875
+          },
+          "actual": {
+            "cpu": 0.005392678,
+            "memory_gb": 0.2971305847167969
+          }
+        }
+      }
+    },
+    "demo-52": {
+      "pods": 2,
+      "is_istio_injected": false,
+      "resources": {
+        "regular": {
+          "containers": 2,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.0160980224609375
+          }
+        }
+      }
+    },
+    "demo-53": {
+      "pods": 2,
+      "is_istio_injected": true,
+      "resources": {
+        "regular": {
+          "containers": 2,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.016109466552734375
+          }
+        },
+        "istio": {
+          "containers": 2,
+          "request": {
+            "cpu": 0.02,
+            "memory_gb": 0.078125
+          },
+          "actual": {
+            "cpu": 0.004216275,
+            "memory_gb": 0.19939041137695312
+          }
+        }
+      }
+    },
+    "demo-54": {
+      "pods": 4,
+      "is_istio_injected": true,
+      "resources": {
+        "regular": {
+          "containers": 4,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.0323333740234375
+          }
+        },
+        "istio": {
+          "containers": 4,
+          "request": {
+            "cpu": 0.04,
+            "memory_gb": 0.15625
+          },
+          "actual": {
+            "cpu": 0.008437231,
+            "memory_gb": 0.3866996765136719
+          }
+        }
+      }
+    },
+    "demo-55": {
+      "pods": 2,
+      "is_istio_injected": true,
+      "resources": {
+        "regular": {
+          "containers": 2,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.0160675048828125
+          }
+        },
+        "istio": {
+          "containers": 2,
+          "request": {
+            "cpu": 0.02,
+            "memory_gb": 0.078125
+          },
+          "actual": {
+            "cpu": 0.004767169,
+            "memory_gb": 0.19744873046875
+          }
+        }
+      }
+    },
+    "demo-56": {
+      "pods": 2,
+      "is_istio_injected": true,
+      "resources": {
+        "regular": {
+          "containers": 2,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.01617431640625
+          }
+        },
+        "istio": {
+          "containers": 2,
+          "request": {
+            "cpu": 0.02,
+            "memory_gb": 0.078125
+          },
+          "actual": {
+            "cpu": 0.00435331,
+            "memory_gb": 0.201568603515625
+          }
+        }
+      }
+    },
+    "demo-57": {
+      "pods": 1,
+      "is_istio_injected": false,
+      "resources": {
+        "regular": {
+          "containers": 1,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.008087158203125
+          }
+        }
+      }
+    },
+    "demo-58": {
+      "pods": 4,
+      "is_istio_injected": true,
+      "resources": {
+        "regular": {
+          "containers": 4,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.032382965087890625
+          }
+        },
+        "istio": {
+          "containers": 4,
+          "request": {
+            "cpu": 0.04,
+            "memory_gb": 0.15625
+          },
+          "actual": {
+            "cpu": 0.0074481619999999995,
+            "memory_gb": 0.4036674499511719
+          }
+        }
+      }
+    },
+    "demo-59": {
+      "pods": 4,
+      "is_istio_injected": true,
+      "resources": {
+        "regular": {
+          "containers": 4,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.032367706298828125
+          }
+        },
+        "istio": {
+          "containers": 4,
+          "request": {
+            "cpu": 0.04,
+            "memory_gb": 0.15625
+          },
+          "actual": {
+            "cpu": 0.00832738,
+            "memory_gb": 0.400787353515625
+          }
+        }
+      }
+    },
+    "demo-6": {
+      "pods": 4,
+      "is_istio_injected": false,
+      "resources": {
+        "regular": {
+          "containers": 4,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.042327880859375
+          }
+        }
+      }
+    },
+    "demo-60": {
+      "pods": 1,
+      "is_istio_injected": true,
+      "resources": {
+        "regular": {
+          "containers": 1,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.008090972900390625
+          }
+        },
+        "istio": {
+          "containers": 1,
+          "request": {
+            "cpu": 0.01,
+            "memory_gb": 0.0390625
+          },
+          "actual": {
+            "cpu": 0.002055671,
+            "memory_gb": 0.10046005249023438
+          }
+        }
+      }
+    },
+    "demo-61": {
+      "pods": 4,
+      "is_istio_injected": true,
+      "resources": {
+        "regular": {
+          "containers": 4,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.032352447509765625
+          }
+        },
+        "istio": {
+          "containers": 4,
+          "request": {
+            "cpu": 0.04,
+            "memory_gb": 0.15625
+          },
+          "actual": {
+            "cpu": 0.007483738,
+            "memory_gb": 0.4006309509277344
+          }
+        }
+      }
+    },
+    "demo-62": {
+      "pods": 1,
+      "is_istio_injected": true,
+      "resources": {
+        "regular": {
+          "containers": 1,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.00804901123046875
+          }
+        },
+        "istio": {
+          "containers": 1,
+          "request": {
+            "cpu": 0.01,
+            "memory_gb": 0.0390625
+          },
+          "actual": {
+            "cpu": 0.001985649,
+            "memory_gb": 0.09903335571289062
+          }
+        }
+      }
+    },
+    "demo-63": {
+      "pods": 5,
+      "is_istio_injected": true,
+      "resources": {
+        "regular": {
+          "containers": 5,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.04029083251953125
+          }
+        },
+        "istio": {
+          "containers": 5,
+          "request": {
+            "cpu": 0.05,
+            "memory_gb": 0.1953125
+          },
+          "actual": {
+            "cpu": 0.009670982000000002,
+            "memory_gb": 0.50347900390625
+          }
+        }
+      }
+    },
+    "demo-64": {
+      "pods": 2,
+      "is_istio_injected": true,
+      "resources": {
+        "regular": {
+          "containers": 2,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.01624298095703125
+          }
+        },
+        "istio": {
+          "containers": 2,
+          "request": {
+            "cpu": 0.02,
+            "memory_gb": 0.078125
+          },
+          "actual": {
+            "cpu": 0.004076199,
+            "memory_gb": 0.194854736328125
+          }
+        }
+      }
+    },
+    "demo-65": {
+      "pods": 1,
+      "is_istio_injected": true,
+      "resources": {
+        "regular": {
+          "containers": 1,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.008045196533203125
+          }
+        },
+        "istio": {
+          "containers": 1,
+          "request": {
+            "cpu": 0.01,
+            "memory_gb": 0.0390625
+          },
+          "actual": {
+            "cpu": 0.001837162,
+            "memory_gb": 0.09968185424804688
+          }
+        }
+      }
+    },
+    "demo-66": {
+      "pods": 5,
+      "is_istio_injected": true,
+      "resources": {
+        "regular": {
+          "containers": 5,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.040523529052734375
+          }
+        },
+        "istio": {
+          "containers": 5,
+          "request": {
+            "cpu": 0.05,
+            "memory_gb": 0.1953125
+          },
+          "actual": {
+            "cpu": 0.009339738,
+            "memory_gb": 0.5055084228515625
+          }
+        }
+      }
+    },
+    "demo-67": {
+      "pods": 4,
+      "is_istio_injected": true,
+      "resources": {
+        "regular": {
+          "containers": 4,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.032398223876953125
+          }
+        },
+        "istio": {
+          "containers": 4,
+          "request": {
+            "cpu": 0.04,
+            "memory_gb": 0.15625
+          },
+          "actual": {
+            "cpu": 0.013984064,
+            "memory_gb": 0.4075279235839844
+          }
+        }
+      }
+    },
+    "demo-68": {
+      "pods": 4,
+      "is_istio_injected": true,
+      "resources": {
+        "regular": {
+          "containers": 4,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.0323333740234375
+          }
+        },
+        "istio": {
+          "containers": 4,
+          "request": {
+            "cpu": 0.04,
+            "memory_gb": 0.15625
+          },
+          "actual": {
+            "cpu": 0.008922506,
+            "memory_gb": 0.3983917236328125
+          }
+        }
+      }
+    },
+    "demo-69": {
+      "pods": 1,
+      "is_istio_injected": false,
+      "resources": {
+        "regular": {
+          "containers": 1,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.00812530517578125
+          }
+        }
+      }
+    },
+    "demo-7": {
+      "pods": 2,
+      "is_istio_injected": true,
+      "resources": {
+        "regular": {
+          "containers": 2,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.01610565185546875
+          }
+        },
+        "istio": {
+          "containers": 2,
+          "request": {
+            "cpu": 0.02,
+            "memory_gb": 0.078125
+          },
+          "actual": {
+            "cpu": 0.004061812,
+            "memory_gb": 0.19409942626953125
+          }
+        }
+      }
+    },
+    "demo-70": {
+      "pods": 2,
+      "is_istio_injected": true,
+      "resources": {
+        "regular": {
+          "containers": 2,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.01596832275390625
+          }
+        },
+        "istio": {
+          "containers": 2,
+          "request": {
+            "cpu": 0.02,
+            "memory_gb": 0.078125
+          },
+          "actual": {
+            "cpu": 0.004168855,
+            "memory_gb": 0.20576858520507812
+          }
+        }
+      }
+    },
+    "demo-71": {
+      "pods": 1,
+      "is_istio_injected": true,
+      "resources": {
+        "regular": {
+          "containers": 1,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.008106231689453125
+          }
+        },
+        "istio": {
+          "containers": 1,
+          "request": {
+            "cpu": 0.01,
+            "memory_gb": 0.0390625
+          },
+          "actual": {
+            "cpu": 0.002306474,
+            "memory_gb": 0.10033416748046875
+          }
+        }
+      }
+    },
+    "demo-72": {
+      "pods": 5,
+      "is_istio_injected": true,
+      "resources": {
+        "regular": {
+          "containers": 5,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.0404205322265625
+          }
+        },
+        "istio": {
+          "containers": 5,
+          "request": {
+            "cpu": 0.05,
+            "memory_gb": 0.1953125
+          },
+          "actual": {
+            "cpu": 0.009772571,
+            "memory_gb": 0.4993247985839844
+          }
+        }
+      }
+    },
+    "demo-73": {
+      "pods": 5,
+      "is_istio_injected": true,
+      "resources": {
+        "regular": {
+          "containers": 5,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.0405426025390625
+          }
+        },
+        "istio": {
+          "containers": 5,
+          "request": {
+            "cpu": 0.05,
+            "memory_gb": 0.1953125
+          },
+          "actual": {
+            "cpu": 0.009935141,
+            "memory_gb": 0.4996070861816406
+          }
+        }
+      }
+    },
+    "demo-74": {
+      "pods": 4,
+      "is_istio_injected": true,
+      "resources": {
+        "regular": {
+          "containers": 4,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.0323486328125
+          }
+        },
+        "istio": {
+          "containers": 4,
+          "request": {
+            "cpu": 0.04,
+            "memory_gb": 0.15625
+          },
+          "actual": {
+            "cpu": 0.011068696999999999,
+            "memory_gb": 0.4025421142578125
+          }
+        }
+      }
+    },
+    "demo-75": {
+      "pods": 3,
+      "is_istio_injected": true,
+      "resources": {
+        "regular": {
+          "containers": 3,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.0240325927734375
+          }
+        },
+        "istio": {
+          "containers": 3,
+          "request": {
+            "cpu": 0.03,
+            "memory_gb": 0.1171875
+          },
+          "actual": {
+            "cpu": 0.00612752,
+            "memory_gb": 0.2979240417480469
+          }
+        }
+      }
+    },
+    "demo-76": {
+      "pods": 4,
+      "is_istio_injected": true,
+      "resources": {
+        "regular": {
+          "containers": 4,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.0324554443359375
+          }
+        },
+        "istio": {
+          "containers": 4,
+          "request": {
+            "cpu": 0.04,
+            "memory_gb": 0.15625
+          },
+          "actual": {
+            "cpu": 0.009459712,
+            "memory_gb": 0.4096717834472656
+          }
+        }
+      }
+    },
+    "demo-77": {
+      "pods": 5,
+      "is_istio_injected": true,
+      "resources": {
+        "regular": {
+          "containers": 5,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.040569305419921875
+          }
+        },
+        "istio": {
+          "containers": 5,
+          "request": {
+            "cpu": 0.05,
+            "memory_gb": 0.1953125
+          },
+          "actual": {
+            "cpu": 0.01101978,
+            "memory_gb": 0.48914337158203125
+          }
+        }
+      }
+    },
+    "demo-78": {
+      "pods": 4,
+      "is_istio_injected": true,
+      "resources": {
+        "regular": {
+          "containers": 4,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.0323638916015625
+          }
+        },
+        "istio": {
+          "containers": 4,
+          "request": {
+            "cpu": 0.04,
+            "memory_gb": 0.15625
+          },
+          "actual": {
+            "cpu": 0.008571091,
+            "memory_gb": 0.3968467712402344
+          }
+        }
+      }
+    },
+    "demo-79": {
+      "pods": 2,
+      "is_istio_injected": false,
+      "resources": {
+        "regular": {
+          "containers": 2,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.01628875732421875
+          }
+        }
+      }
+    },
+    "demo-8": {
+      "pods": 2,
+      "is_istio_injected": true,
+      "resources": {
+        "regular": {
+          "containers": 2,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.01609039306640625
+          }
+        },
+        "istio": {
+          "containers": 2,
+          "request": {
+            "cpu": 0.02,
+            "memory_gb": 0.078125
+          },
+          "actual": {
+            "cpu": 0.003904818,
+            "memory_gb": 0.199951171875
+          }
+        }
+      }
+    },
+    "demo-80": {
+      "pods": 4,
+      "is_istio_injected": true,
+      "resources": {
+        "regular": {
+          "containers": 4,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.032283782958984375
+          }
+        },
+        "istio": {
+          "containers": 4,
+          "request": {
+            "cpu": 0.04,
+            "memory_gb": 0.15625
+          },
+          "actual": {
+            "cpu": 0.007577293000000001,
+            "memory_gb": 0.4026985168457031
+          }
+        }
+      }
+    },
+    "demo-81": {
+      "pods": 3,
+      "is_istio_injected": true,
+      "resources": {
+        "regular": {
+          "containers": 3,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.024112701416015625
+          }
+        },
+        "istio": {
+          "containers": 3,
+          "request": {
+            "cpu": 0.03,
+            "memory_gb": 0.1171875
+          },
+          "actual": {
+            "cpu": 0.006188473,
+            "memory_gb": 0.2948341369628906
+          }
+        }
+      }
+    },
+    "demo-82": {
+      "pods": 4,
+      "is_istio_injected": true,
+      "resources": {
+        "regular": {
+          "containers": 4,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.032367706298828125
+          }
+        },
+        "istio": {
+          "containers": 4,
+          "request": {
+            "cpu": 0.04,
+            "memory_gb": 0.15625
+          },
+          "actual": {
+            "cpu": 0.008652593,
+            "memory_gb": 0.3981742858886719
+          }
+        }
+      }
+    },
+    "demo-83": {
+      "pods": 4,
+      "is_istio_injected": true,
+      "resources": {
+        "regular": {
+          "containers": 4,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.032245635986328125
+          }
+        },
+        "istio": {
+          "containers": 4,
+          "request": {
+            "cpu": 0.04,
+            "memory_gb": 0.15625
+          },
+          "actual": {
+            "cpu": 0.007355521,
+            "memory_gb": 0.39324188232421875
+          }
+        }
+      }
+    },
+    "demo-84": {
+      "pods": 5,
+      "is_istio_injected": true,
+      "resources": {
+        "regular": {
+          "containers": 5,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.040378570556640625
+          }
+        },
+        "istio": {
+          "containers": 5,
+          "request": {
+            "cpu": 0.05,
+            "memory_gb": 0.1953125
+          },
+          "actual": {
+            "cpu": 0.010266036000000001,
+            "memory_gb": 0.5048446655273438
+          }
+        }
+      }
+    },
+    "demo-85": {
+      "pods": 1,
+      "is_istio_injected": true,
+      "resources": {
+        "regular": {
+          "containers": 1,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.008045196533203125
+          }
+        },
+        "istio": {
+          "containers": 1,
+          "request": {
+            "cpu": 0.01,
+            "memory_gb": 0.0390625
+          },
+          "actual": {
+            "cpu": 0.001961489,
+            "memory_gb": 0.09584808349609375
+          }
+        }
+      }
+    },
+    "demo-86": {
+      "pods": 3,
+      "is_istio_injected": true,
+      "resources": {
+        "regular": {
+          "containers": 3,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.024112701416015625
+          }
+        },
+        "istio": {
+          "containers": 3,
+          "request": {
+            "cpu": 0.03,
+            "memory_gb": 0.1171875
+          },
+          "actual": {
+            "cpu": 0.005687045,
+            "memory_gb": 0.29604339599609375
+          }
+        }
+      }
+    },
+    "demo-87": {
+      "pods": 5,
+      "is_istio_injected": false,
+      "resources": {
+        "regular": {
+          "containers": 5,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.040386199951171875
+          }
+        }
+      }
+    },
+    "demo-88": {
+      "pods": 3,
+      "is_istio_injected": false,
+      "resources": {
+        "regular": {
+          "containers": 3,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.024181365966796875
+          }
+        }
+      }
+    },
+    "demo-89": {
+      "pods": 2,
+      "is_istio_injected": true,
+      "resources": {
+        "regular": {
+          "containers": 2,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.016124725341796875
+          }
+        },
+        "istio": {
+          "containers": 2,
+          "request": {
+            "cpu": 0.02,
+            "memory_gb": 0.078125
+          },
+          "actual": {
+            "cpu": 0.00397524,
+            "memory_gb": 0.2020416259765625
+          }
+        }
+      }
+    },
+    "demo-9": {
+      "pods": 2,
+      "is_istio_injected": false,
+      "resources": {
+        "regular": {
+          "containers": 2,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.01601409912109375
+          }
+        }
+      }
+    },
+    "demo-90": {
+      "pods": 3,
+      "is_istio_injected": true,
+      "resources": {
+        "regular": {
+          "containers": 3,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.024173736572265625
+          }
+        },
+        "istio": {
+          "containers": 3,
+          "request": {
+            "cpu": 0.03,
+            "memory_gb": 0.1171875
+          },
+          "actual": {
+            "cpu": 0.00573389,
+            "memory_gb": 0.2968902587890625
+          }
+        }
+      }
+    },
+    "demo-91": {
+      "pods": 2,
+      "is_istio_injected": true,
+      "resources": {
+        "regular": {
+          "containers": 2,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.016025543212890625
+          }
+        },
+        "istio": {
+          "containers": 2,
+          "request": {
+            "cpu": 0.02,
+            "memory_gb": 0.078125
+          },
+          "actual": {
+            "cpu": 0.003491574,
+            "memory_gb": 0.19608306884765625
+          }
+        }
+      }
+    },
+    "demo-92": {
+      "pods": 4,
+      "is_istio_injected": true,
+      "resources": {
+        "regular": {
+          "containers": 4,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.032459259033203125
+          }
+        },
+        "istio": {
+          "containers": 4,
+          "request": {
+            "cpu": 0.04,
+            "memory_gb": 0.15625
+          },
+          "actual": {
+            "cpu": 0.007432377,
+            "memory_gb": 0.3907737731933594
+          }
+        }
+      }
+    },
+    "demo-93": {
+      "pods": 5,
+      "is_istio_injected": true,
+      "resources": {
+        "regular": {
+          "containers": 5,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.04045867919921875
+          }
+        },
+        "istio": {
+          "containers": 5,
+          "request": {
+            "cpu": 0.05,
+            "memory_gb": 0.1953125
+          },
+          "actual": {
+            "cpu": 0.009559635,
+            "memory_gb": 0.4905967712402344
+          }
+        }
+      }
+    },
+    "demo-94": {
+      "pods": 5,
+      "is_istio_injected": false,
+      "resources": {
+        "regular": {
+          "containers": 5,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.0403900146484375
+          }
+        }
+      }
+    },
+    "demo-95": {
+      "pods": 1,
+      "is_istio_injected": true,
+      "resources": {
+        "regular": {
+          "containers": 1,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.008007049560546875
+          }
+        },
+        "istio": {
+          "containers": 1,
+          "request": {
+            "cpu": 0.01,
+            "memory_gb": 0.0390625
+          },
+          "actual": {
+            "cpu": 0.001981793,
+            "memory_gb": 0.1043243408203125
+          }
+        }
+      }
+    },
+    "demo-96": {
+      "pods": 1,
+      "is_istio_injected": false,
+      "resources": {
+        "regular": {
+          "containers": 1,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.00800323486328125
+          }
+        }
+      }
+    },
+    "demo-97": {
+      "pods": 2,
+      "is_istio_injected": true,
+      "resources": {
+        "regular": {
+          "containers": 2,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.015987396240234375
+          }
+        },
+        "istio": {
+          "containers": 2,
+          "request": {
+            "cpu": 0.02,
+            "memory_gb": 0.078125
+          },
+          "actual": {
+            "cpu": 0.003652049,
+            "memory_gb": 0.2042236328125
+          }
+        }
+      }
+    },
+    "demo-98": {
+      "pods": 2,
+      "is_istio_injected": false,
+      "resources": {
+        "regular": {
+          "containers": 2,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.016094207763671875
+          }
+        }
+      }
+    },
+    "demo-99": {
+      "pods": 1,
+      "is_istio_injected": true,
+      "resources": {
+        "regular": {
+          "containers": 1,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0.007984161376953125
+          }
+        },
+        "istio": {
+          "containers": 1,
+          "request": {
+            "cpu": 0.01,
+            "memory_gb": 0.0390625
+          },
+          "actual": {
+            "cpu": 0.002116249,
+            "memory_gb": 0.10141754150390625
+          }
+        }
+      }
+    },
+    "istio-system": {
+      "pods": 3,
+      "is_istio_injected": false,
+      "resources": {
+        "regular": {
+          "containers": 1,
+          "request": {
+            "cpu": 0.01,
+            "memory_gb": 0.09765625
+          },
+          "actual": {
+            "cpu": 0.011490205,
+            "memory_gb": 0.668792724609375
+          }
+        }
+      }
+    },
+    "kube-node-lease": {
+      "pods": 0,
+      "is_istio_injected": false,
+      "resources": {
+        "regular": {
+          "containers": 0,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0
+          }
+        }
+      }
+    },
+    "kube-public": {
+      "pods": 0,
+      "is_istio_injected": false,
+      "resources": {
+        "regular": {
+          "containers": 0,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0,
+            "memory_gb": 0
+          }
+        }
+      }
+    },
+    "kube-system": {
+      "pods": 15,
+      "is_istio_injected": false,
+      "resources": {
+        "regular": {
+          "containers": 15,
+          "request": {
+            "cpu": 1.35,
+            "memory_gb": 0.625
+          },
+          "actual": {
+            "cpu": 0.128837692,
+            "memory_gb": 1.7460517883300781
+          }
+        }
+      }
+    },
+    "local-path-storage": {
+      "pods": 1,
+      "is_istio_injected": false,
+      "resources": {
+        "regular": {
+          "containers": 1,
+          "request": {
+            "cpu": 0,
+            "memory_gb": 0
+          },
+          "actual": {
+            "cpu": 0.000029975,
+            "memory_gb": 0.012920379638671875
+          }
+        }
+      }
+    }
+  },
+  "nodes": {
+    "ambient-cost-control-plane": {
+      "instance_type": "unknown",
+      "region": "unknown",
+      "zone": "unknown",
+      "resources": {
+        "capacity": {
+          "cpu": 10,
+          "memory_gb": 46.96571350097656
+        },
+        "actual": {
+          "cpu": 0.129242732,
+          "memory_gb": 1.5271263122558594
+        }
+      }
+    },
+    "ambient-cost-worker": {
+      "instance_type": "unknown",
+      "region": "unknown",
+      "zone": "unknown",
+      "resources": {
+        "capacity": {
+          "cpu": 10,
+          "memory_gb": 46.96571350097656
+        },
+        "actual": {
+          "cpu": 0.315818828,
+          "memory_gb": 9.80417251586914
+        }
+      }
+    },
+    "ambient-cost-worker2": {
+      "instance_type": "unknown",
+      "region": "unknown",
+      "zone": "unknown",
+      "resources": {
+        "capacity": {
+          "cpu": 10,
+          "memory_gb": 46.96571350097656
+        },
+        "actual": {
+          "cpu": 0.330218757,
+          "memory_gb": 11.428947448730469
+        }
+      }
+    },
+    "ambient-cost-worker3": {
+      "instance_type": "unknown",
+      "region": "unknown",
+      "zone": "unknown",
+      "resources": {
+        "capacity": {
+          "cpu": 10,
+          "memory_gb": 46.96571350097656
+        },
+        "actual": {
+          "cpu": 0.289401561,
+          "memory_gb": 9.372722625732422
+        }
+      }
+    }
+  },
+  "has_metrics": true
 }

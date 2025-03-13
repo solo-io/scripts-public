@@ -1,10 +1,10 @@
 #!/bin/sh
-# Example: CONTEXTS="cluster1 cluster2" ./gather-cluster-info.sh [--hide-names|-hn] [--help|-h]
+# Example: CONTEXT="mycluster" ./gather-cluster-info.sh [--hide-names|-hn] [--help|-h]
 
 #######################################################################
-# This script collects information about the resources in a set of Kubernetes contexts.
-# It is v1 of the script used to get minimal information about the clusters used for v1(?)
-# of the backend whic is a generalized overview, without specific details (getting region
+# This script collects information about the resources in a Kubernetes context.
+# It is v1 of the script used to get minimal information about the cluster used for v1(?)
+# of the backend which is a generalized overview, without specific details (getting region
 # information, specific _used_ instance cost, etc.)
 #######################################################################
 
@@ -12,6 +12,7 @@
 # - add in native sidecars https://istio.io/latest/blog/2023/native-sidecars/
 # - add region information (v2?)
 # - add specific details about the used instances (v2?)
+# - add multi-cluster support (v2?)
 
 # log colors
 INFO='\033[0;34m'
@@ -21,15 +22,12 @@ RESET='\033[0m'
 
 # Progress bar variables
 PROGRESS_WIDTH=50
-TOTAL_CLUSTERS=0
 TOTAL_NAMESPACES=0
-CURRENT_CLUSTER=0
 CURRENT_NAMESPACE=0
-CURRENT_CLUSTER_NAMESPACES=0
 
 help() {
   echo "Usage: $0 [--hide-names|-hn] [--help|-h]"
-  echo "  --hide-names|-hn: Hide the names of the clusters and namespaces using a hash"
+  echo "  --hide-names|-hn: Hide the names of the cluster and namespaces using a hash"
   echo "  --help|-h: Show this help message"
   exit 1
 }
@@ -64,7 +62,7 @@ draw_progress_bar() {
 # Function to update progress
 update_progress() {
   local progress=0
-  [ $CURRENT_CLUSTER_NAMESPACES -gt 0 ] && progress=$(echo "scale=2; $CURRENT_NAMESPACE * 100 / $CURRENT_CLUSTER_NAMESPACES" | bc)
+  [ $TOTAL_NAMESPACES -gt 0 ] && progress=$(echo "scale=2; $CURRENT_NAMESPACE * 100 / $TOTAL_NAMESPACES" | bc)
   
   # Ensure we don't exceed 100%
   if [ $(echo "$progress > 100" | bc -l) -eq 1 ]; then
@@ -74,10 +72,14 @@ update_progress() {
   draw_progress_bar $progress $PROGRESS_WIDTH
 }
 
-# check contexts input
-if [ -z "$CONTEXTS" ]; then
-  log_error "Please set the CONTEXTS environment variable to a space-separated list of kube contexts."
-  exit 1
+# Check for CONTEXT or use current context
+if [ -z "$CONTEXT" ]; then
+  CONTEXT=$(kubectl config current-context 2>/dev/null)
+  if [ -z "$CONTEXT" ]; then
+    log_error "No current kubectl context found and CONTEXT environment variable not set."
+    exit 1
+  fi
+  log_info "Using current kubectl context: $CONTEXT"
 fi
 
 OBFUSCATE_NAMES=false
@@ -116,7 +118,7 @@ else
 fi
 
 # Initialize JSON structure
-echo '{}' > cluster_info.json
+echo '{"name": "", "namespaces": {}, "nodes": {}, "has_metrics": false}' > cluster_info.json
 
 # JQ functions for parsing memory and CPU
 parse_mem_cmd='def parse_mem:
@@ -150,8 +152,7 @@ parse_cpu_cmd='def parse_cpu:
 process_node_data() {
   local node_name="$1"
   local ctx="$2"
-  local out_ctx="$3"
-  local has_metrics="$4"
+  local has_metrics="$3"
 
   out_node_name=$node_name
   if [ "$OBFUSCATE_NAMES" = true ]; then
@@ -242,8 +243,8 @@ process_node_data() {
 
   # Add node data to the main JSON file
   if [ -n "$node_data" ]; then
-    jq --arg ctx "$out_ctx" --arg node "$out_node_name" --argjson data "$node_data" \
-      '.[$ctx].nodes[$node] = $data' cluster_info.json > tmp.json && mv tmp.json cluster_info.json
+    jq --arg node "$out_node_name" --argjson data "$node_data" \
+      '.nodes[$node] = $data' cluster_info.json > tmp.json && mv tmp.json cluster_info.json
   else
     log_warn "Empty node data generated for node $node_name"
     return 1
@@ -254,9 +255,8 @@ process_node_data() {
 process_namespace_data() {
   local ns_name="$1"
   local ctx="$2"
-  local out_ctx="$3"
-  local has_metrics="$4"
-  local is_istio_injected="$5"
+  local has_metrics="$3"
+  local is_istio_injected="$4"
 
   out_ns_name=$ns_name
   if [ "$OBFUSCATE_NAMES" = true ]; then
@@ -442,89 +442,76 @@ process_namespace_data() {
 
   # Add namespace data to the main JSON file
   if [ -n "$metrics" ]; then
-    jq --arg ctx "$out_ctx" --arg ns "$out_ns_name" --argjson data "$metrics" \
-      '.[$ctx].namespaces[$ns] = $data' cluster_info.json > tmp.json && mv tmp.json cluster_info.json
+    jq --arg ns "$out_ns_name" --argjson data "$metrics" \
+      '.namespaces[$ns] = $data' cluster_info.json > tmp.json && mv tmp.json cluster_info.json
   else
     log_warn "Empty metrics generated for namespace $ns_name"
     return 1
   fi
 }
 
-# Count total clusters and namespaces
-TOTAL_CLUSTERS=$(echo "$CONTEXTS" | wc -w)
-for ctx in $CONTEXTS; do
-  ns_count=$(kubectl --context="$ctx" get ns -o json | jq -r '.items[] | .metadata.name' | wc -l)
-  TOTAL_NAMESPACES=$((TOTAL_NAMESPACES + ns_count))
-done
+# Get count of namespaces
+TOTAL_NAMESPACES=$(kubectl --context="$CONTEXT" get ns -o json | jq -r '.items[] | .metadata.name' | wc -l)
 
-log_info "Found $TOTAL_CLUSTERS cluster(s) with a total of $TOTAL_NAMESPACES namespace(s) to process"
+log_info "Found a total of $TOTAL_NAMESPACES namespace(s) to process in context $CONTEXT"
 
-for ctx in $CONTEXTS; do
-  echo
-  log_info "Processing context: $ctx"
-  
-  out_ctx=$ctx
-  if [ "$OBFUSCATE_NAMES" = true ]; then
-    out_ctx=$(echo "$ctx" | sha256sum | awk '{print $1}')
-  fi
+echo
+log_info "Processing context: $CONTEXT"
 
-  # Check if metrics API is available for this cluster
-  has_metrics=false
-  if kubectl --context="$ctx" top pod -A >/dev/null 2>&1; then
-    has_metrics=true
-    log_info "Metrics API available for cluster $ctx"
-  else
-    log_warn "Metrics API not available for cluster $ctx"
-  fi
+out_ctx=$CONTEXT
+if [ "$OBFUSCATE_NAMES" = true ]; then
+  out_ctx=$(echo "$CONTEXT" | sha256sum | awk '{print $1}')
+fi
 
-  # Initialize context object
-  jq --arg ctx "$out_ctx" --argjson has_metrics "$has_metrics" \
-    '.[$ctx] = {"namespaces": {}, "nodes": {}, "has_metrics": $has_metrics}' cluster_info.json > tmp.json && mv tmp.json cluster_info.json
+# Set the cluster name in the JSON
+jq --arg name "$out_ctx" '.name = $name' cluster_info.json > tmp.json && mv tmp.json cluster_info.json
 
-  # Process node information (just the count, at least for now)
-  # node_count=$(kubectl --context="$ctx" get nodes --no-headers 2>/dev/null | wc -l)
-  
-  # get list of nodes
-  nodes=$(kubectl --context="$ctx" get nodes -o json | jq -r '.items[] | .metadata.name')
-  if [ -z "$nodes" ]; then
-    log_warn "No nodes found for cluster $ctx"
-    CURRENT_CLUSTER=$((CURRENT_CLUSTER + 1))
-    continue
-  fi
-  
+# Check if metrics API is available for this cluster
+has_metrics=false
+if kubectl --context="$CONTEXT" top pod -A >/dev/null 2>&1; then
+  has_metrics=true
+  log_info "Metrics API available for cluster $CONTEXT"
+else
+  log_warn "Metrics API not available for cluster $CONTEXT"
+fi
+
+# Update the has_metrics field
+jq --argjson has_metrics "$has_metrics" '.has_metrics = $has_metrics' cluster_info.json > tmp.json && mv tmp.json cluster_info.json
+
+# get list of nodes
+nodes=$(kubectl --context="$CONTEXT" get nodes -o json | jq -r '.items[] | .metadata.name')
+if [ -z "$nodes" ]; then
+  log_warn "No nodes found for cluster $CONTEXT"
+else
   # process each node
   for node in $nodes; do
-    process_node_data "$node" "$ctx" "$out_ctx" "$has_metrics"
+    process_node_data "$node" "$CONTEXT" "$has_metrics"
   done
+fi
 
-  # Cache namespaces with istio injection
-  namespaces=$(kubectl --context="$ctx" get ns -o json | \
-    jq -r '.items[] | .metadata.name')
+# Cache namespaces with istio injection
+namespaces=$(kubectl --context="$CONTEXT" get ns -o json | \
+  jq -r '.items[] | .metadata.name')
 
-  if [ -z "$namespaces" ]; then
-    log_warn "No namespaces found in context $ctx"
-    CURRENT_CLUSTER=$((CURRENT_CLUSTER + 1))
-    continue
-  fi
-
-  # Reset namespace counter for this cluster
+if [ -z "$namespaces" ]; then
+  log_warn "No namespaces found in context $CONTEXT"
+else
+  # Reset namespace counter
   CURRENT_NAMESPACE=0
-  CURRENT_CLUSTER_NAMESPACES=$(echo "$namespaces" | wc -l)
+  TOTAL_NAMESPACES=$(echo "$namespaces" | wc -l)
   update_progress
 
   # Process each namespace
   while IFS= read -r ns_name; do
     # Check if namespace has Istio injection
-    is_istio_injected=$(kubectl --context="$ctx" get ns "$ns_name" -o json | \
+    is_istio_injected=$(kubectl --context="$CONTEXT" get ns "$ns_name" -o json | \
       jq -r '(.metadata.labels["istio-injection"] == "enabled") or (.metadata.labels["istio.io/rev"] != null)')
     
-    process_namespace_data "$ns_name" "$ctx" "$out_ctx" "$has_metrics" "$is_istio_injected"
+    process_namespace_data "$ns_name" "$CONTEXT" "$has_metrics" "$is_istio_injected"
     CURRENT_NAMESPACE=$((CURRENT_NAMESPACE + 1))
     update_progress
   done <<< "$namespaces"
-
-  CURRENT_CLUSTER=$((CURRENT_CLUSTER + 1))
-done
+fi
 
 echo # New line after progress bar
 log_info "Data collection complete. Output file: cluster_info.json"
