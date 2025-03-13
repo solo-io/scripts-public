@@ -9,6 +9,7 @@
 #######################################################################
 
 # TODO
+# - get the pods and nodes consecutively instead of processing one, then the other to avoid a mismatch in the metrics data (ex. we get pods info to get metrics, then 2 minutes later get nodes info, but they won't be in a similar state)
 # - add in native sidecars https://istio.io/latest/blog/2023/native-sidecars/
 # - add region information (v2?)
 # - add specific details about the used instances (v2?)
