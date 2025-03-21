@@ -1,5 +1,5 @@
 #!/bin/sh
-# Example: CONTEXT="mycluster" ./gather-cluster-info.sh [--hide-names|-hn] [--help|-h]
+# Example: CONTEXT="mycluster" ./gather-cluster-info.sh [--hide-names|-hn] [--continue|-c] [--help|-h]
 
 #######################################################################
 # This script collects information about the resources in a Kubernetes context.
@@ -14,6 +14,15 @@
 # - add region information (v2?)
 # - add specific details about the used instances (v2?)
 # - add multi-cluster support (v2?)
+
+#######################################################################
+# Feedback (03/21/2025)
+# - can conditionally use istioctl if it's installed and get resource usage (look into solely relying on kubectl top if resource usage.)
+# - branch to use `istioctl bug report` if it's installed?
+# - TODO: maybe use less files when processing namespaces? it could lead to a lot of tmp file, mayb do a batch process like every 10(0) namespaces, write to final file, then delete tmp files and continue?
+
+# TODO(grand scheme): convert this to go binary / keep as script in the meantime
+#######################################################################
 
 # log colors
 INFO='\033[0;34m'
@@ -80,10 +89,10 @@ if [ -z "$CONTEXT" ]; then
     log_error "No current kubectl context found and CONTEXT environment variable not set."
     exit 1
   fi
-  log_info "Using current kubectl context: $CONTEXT"
 fi
 
 OBFUSCATE_NAMES=false
+CONTINUE_PROCESSING=false
 
 # check for optional flags
 while [ $# -gt 0 ]; do
@@ -93,6 +102,9 @@ while [ $# -gt 0 ]; do
       ;;
     --help|-h)
       help
+      ;;
+    --continue|-c)
+      CONTINUE_PROCESSING=true
       ;;
     *)
       log_error "Unknown argument: $1"
@@ -112,14 +124,20 @@ for cmd in $expected_commands; do
 done
 
 if [ -n "$missing_commands" ]; then
-  log_error "The following commands are required but not found in the current environment:$missing_commands"
+  log_error "The following commands are required but not found in the current environment: $missing_commands"
   exit 1
-else
-  log_info "All required commands found in the current environment."
 fi
 
-# Initialize JSON structure
-echo '{"name": "", "namespaces": {}, "nodes": {}, "has_metrics": false}' > cluster_info.json
+# if not continuing, (re)initialize the cluster_info.json file, else keep the existing file
+if [ "$CONTINUE_PROCESSING" = false ]; then
+  echo '{"name": "", "namespaces": {}, "nodes": {}, "has_metrics": false}' > cluster_info.json
+else
+  # check if cluster_info.json exists when continuing
+  if [ ! -f "cluster_info.json" ]; then
+    log_error "cluster_info.json does not exist to continue processing"
+    exit 1
+  fi
+fi
 
 # JQ functions for parsing memory and CPU
 parse_mem_cmd='def parse_mem:
@@ -154,6 +172,13 @@ process_node_data() {
   local node_name="$1"
   local ctx="$2"
   local has_metrics="$3"
+
+  # check if continuing, if so, skip if node already exists
+  if [ "$CONTINUE_PROCESSING" = true ]; then
+    if jq -e ".nodes[\"$node_name\"]" cluster_info.json > /dev/null 2>&1; then
+      return 0
+    fi
+  fi
 
   out_node_name=$node_name
   if [ "$OBFUSCATE_NAMES" = true ]; then
@@ -252,29 +277,60 @@ process_node_data() {
   fi
 }
 
-# Function to process namespace data from cached JSON
-process_namespace_data() {
+# Check if system supports parallel processing
+MAX_PARALLEL=8  # Default number of parallel processes
+if command -v nproc > /dev/null; then
+  CORES=$(nproc)
+  MAX_PARALLEL=$((CORES > 8 ? 8 : CORES))
+  log_info "System has $CORES cores, using $MAX_PARALLEL parallel processes for namespace processing"
+else
+  log_info "Using default of $MAX_PARALLEL parallel processes for namespace processing"
+fi
+
+# temporary directory to store namespace processing results
+TEMP_DIR=$(mktemp -d)
+if [ $? -ne 0 ]; then
+  log_error "Failed to create temporary directory for parallel processing"
+  exit 1
+fi
+
+# Setup cleanup trap
+trap 'rm -rf "$TEMP_DIR"' EXIT
+
+# Function to process a namespace and saves to a temporary file
+process_namespace_parallel() {
   local ns_name="$1"
   local ctx="$2"
   local has_metrics="$3"
-  local is_istio_injected="$4"
+  local temp_dir="$4"
+  local output_file="$temp_dir/$ns_name.json"
 
+  # check if continuing, if so, skip if namespace already exists
+  if [ "$CONTINUE_PROCESSING" = true ]; then
+    if jq -e ".namespaces[\"$ns_name\"]" cluster_info.json > /dev/null 2>&1; then
+      return 0
+    fi
+  fi
+  
+  # Check if namespace has Istio injection
+  is_istio_injected=$(kubectl --context="$ctx" get ns "$ns_name" -o json | \
+    jq -r '(.metadata.labels["istio-injection"] == "enabled") or (.metadata.labels["istio.io/rev"] != null)')
+  
   out_ns_name=$ns_name
   if [ "$OBFUSCATE_NAMES" = true ]; then
     out_ns_name=$(echo "$ns_name" | sha256sum | awk '{print $1}')
   fi
 
   pods_json=$(kubectl --context="$ctx" -n "$ns_name" get pods -o json 2>/dev/null | jq -c '.items')
-  # if the pods_json is empty or null, return 1
   if [ -z "$pods_json" ] || [ "$pods_json" = "null" ]; then
-    log_warn "No pods found for namespace $ns_name"
+    echo "{\"status\": \"error\", \"message\": \"No pods found for namespace $ns_name\"}" > "$output_file"
     return 1
   fi
 
   if [ "$has_metrics" = true ]; then
     pods_json_metrics=$(kubectl --context="$ctx" -n "$ns_name" get pods.metrics -o json 2>/dev/null | jq -c '.items')
     if [ -z "$pods_json_metrics" ] || [ "$pods_json_metrics" = "null" ]; then
-      log_warn "No metrics found for pods in namespace $ns_name"
+      echo "No metrics found for pods in namespace $ns_name" >> "$temp_dir/warnings.log"
     fi
   fi
 
@@ -294,7 +350,7 @@ process_namespace_data() {
 
   pod_count=$(jq -r 'length' <<< "$pods_json")
   if [ $? -ne 0 ] || [ -z "$pod_count" ]; then
-    log_warn "Failed to get pod count for namespace $ns_name"
+    echo "{\"status\": \"error\", \"message\": \"Failed to get pod count for namespace $ns_name\"}" > "$output_file"
     return 1
   fi
 
@@ -331,6 +387,8 @@ process_namespace_data() {
 
   # Build the base jq filter
   jq_filter='{
+    ns_name: $ns_name,
+    out_ns_name: $out_ns_name,
     pods: $pods,
     is_istio_injected: $is_istio_injected,
     resources: {
@@ -347,6 +405,8 @@ process_namespace_data() {
   # If namespace has Istio injection, add Istio resources
   if [ "$is_istio_injected" = "true" ]; then
     jq_filter='{
+      ns_name: $ns_name,
+      out_ns_name: $out_ns_name,
       pods: $pods,
       is_istio_injected: $is_istio_injected,
       resources: {
@@ -372,6 +432,8 @@ process_namespace_data() {
   if [ "$has_metrics" = true ]; then
     if [ "$is_istio_injected" = "true" ]; then
       jq_filter='{
+        ns_name: $ns_name,
+        out_ns_name: $out_ns_name,
         pods: $pods,
         is_istio_injected: $is_istio_injected,
         resources: {
@@ -401,6 +463,8 @@ process_namespace_data() {
       }'
     else
       jq_filter='{
+        ns_name: $ns_name,
+        out_ns_name: $out_ns_name,
         pods: $pods,
         is_istio_injected: $is_istio_injected,
         resources: {
@@ -420,8 +484,10 @@ process_namespace_data() {
     fi
   fi
 
-  # Use jq to construct the metrics object
-  metrics=$(jq -n \
+  # Use jq to construct the metrics object and save to temporary file
+  jq -n \
+    --arg ns_name "$ns_name" \
+    --arg out_ns_name "$out_ns_name" \
     --argjson pods "$pod_count" \
     --argjson is_istio_injected "$is_istio_injected" \
     --argjson reg_containers "$regular_containers" \
@@ -434,30 +500,17 @@ process_namespace_data() {
     --argjson istio_mem "$istio_mem" \
     --argjson istio_cpu_actual "$istio_cpu_actual" \
     --argjson istio_mem_actual "$istio_mem_actual" \
-    "$jq_filter")
+    "$jq_filter" > "$output_file"
 
   if [ $? -ne 0 ]; then
-    log_warn "Failed to construct metrics JSON for namespace $ns_name"
-    return 1
-  fi
-
-  # Add namespace data to the main JSON file
-  if [ -n "$metrics" ]; then
-    jq --arg ns "$out_ns_name" --argjson data "$metrics" \
-      '.namespaces[$ns] = $data' cluster_info.json > tmp.json && mv tmp.json cluster_info.json
-  else
-    log_warn "Empty metrics generated for namespace $ns_name"
+    echo "{\"status\": \"error\", \"message\": \"Failed to construct metrics JSON for namespace $ns_name\"}" > "$output_file"
     return 1
   fi
 }
 
 # Get count of namespaces
 TOTAL_NAMESPACES=$(kubectl --context="$CONTEXT" get ns -o json | jq -r '.items[] | .metadata.name' | wc -l)
-
 log_info "Found a total of $TOTAL_NAMESPACES namespace(s) to process in context $CONTEXT"
-
-echo
-log_info "Processing context: $CONTEXT"
 
 out_ctx=$CONTEXT
 if [ "$OBFUSCATE_NAMES" = true ]; then
@@ -502,16 +555,61 @@ else
   TOTAL_NAMESPACES=$(echo "$namespaces" | wc -l)
   update_progress
 
-  # Process each namespace
+  # Process each namespace in parallel with controlled concurrency
+  running=0
+  touch "$TEMP_DIR/warnings.log"
+
   while IFS= read -r ns_name; do
-    # Check if namespace has Istio injection
-    is_istio_injected=$(kubectl --context="$CONTEXT" get ns "$ns_name" -o json | \
-      jq -r '(.metadata.labels["istio-injection"] == "enabled") or (.metadata.labels["istio.io/rev"] != null)')
+    # Wait if we've reached the maximum number of parallel processes
+    while [ $running -ge $MAX_PARALLEL ]; do
+      # Wait for a child process to finish
+      wait -n 2>/dev/null || true
+      # Count remaining background jobs
+      running=$(jobs -p | wc -l)
+    done
+
+    process_namespace_parallel "$ns_name" "$CONTEXT" "$has_metrics" "$TEMP_DIR" &
+    running=$((running + 1))
     
-    process_namespace_data "$ns_name" "$CONTEXT" "$has_metrics" "$is_istio_injected"
+    # For a more accurate progress bar, increment after each job is launched
     CURRENT_NAMESPACE=$((CURRENT_NAMESPACE + 1))
     update_progress
   done <<< "$namespaces"
+
+  # Wait for all background jobs to complete
+  wait
+
+  # Process warnings
+  if [ -s "$TEMP_DIR/warnings.log" ]; then
+    while IFS= read -r warning; do
+      log_warn "$warning"
+      log_info "If this was a transient error, you can re-run the script with the --continue flag to only process the namespaces that failed"
+    done < "$TEMP_DIR/warnings.log"
+  fi
+
+  # Process results and incorporate into main JSON file
+  for result_file in "$TEMP_DIR"/*.json; do
+    if [ -f "$result_file" ]; then
+      # Check if file contains an error message
+      is_error=$(jq -r '.status // "success"' "$result_file")
+      
+      if [ "$is_error" = "error" ]; then
+        error_msg=$(jq -r '.message' "$result_file")
+        log_warn "$error_msg"
+        log_info "If this was a transient error, you can re-run the script with the --continue flag to only process the namespaces that failed"
+      else
+        ns_name=$(jq -r '.ns_name' "$result_file")
+        out_ns_name=$(jq -r '.out_ns_name' "$result_file")
+        
+        # Remove the internal fields we added for processing
+        jq 'del(.ns_name) | del(.out_ns_name)' "$result_file" > "$result_file.tmp"
+        
+        # Add to the final cluster json
+        jq --arg ns "$out_ns_name" --slurpfile data "$result_file.tmp" \
+          '.namespaces[$ns] = $data[0]' cluster_info.json > tmp.json && mv tmp.json cluster_info.json
+      fi
+    fi
+  done
 fi
 
 echo # New line after progress bar
