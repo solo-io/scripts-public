@@ -8,22 +8,6 @@
 # information, specific _used_ instance cost, etc.)
 #######################################################################
 
-# TODO
-# - get the pods and nodes consecutively instead of processing one, then the other to avoid a mismatch in the metrics data (ex. we get pods info to get metrics, then 2 minutes later get nodes info, but they won't be in a similar state)
-# - add in native sidecars https://istio.io/latest/blog/2023/native-sidecars/
-# - add region information (v2?)
-# - add specific details about the used instances (v2?)
-# - add multi-cluster support (v2?)
-
-#######################################################################
-# Feedback (03/21/2025)
-# - can conditionally use istioctl if it's installed and get resource usage (look into solely relying on kubectl top if resource usage.)
-# - branch to use `istioctl bug report` if it's installed?
-# - TODO: maybe use less files when processing namespaces? it could lead to a lot of tmp file, mayb do a batch process like every 10(0) namespaces, write to final file, then delete tmp files and continue?
-
-# TODO(grand scheme): convert this to go binary / keep as script in the meantime
-#######################################################################
-
 # log colors
 INFO='\033[0;34m'
 WARN='\033[0;33m'
@@ -36,9 +20,10 @@ TOTAL_NAMESPACES=0
 CURRENT_NAMESPACE=0
 
 help() {
-  echo "Usage: $0 [--hide-names|-hn] [--help|-h]"
+  echo "Usage: $0 [--hide-names|-hn] [--help|-h] [--continue|-c]"
   echo "  --hide-names|-hn: Hide the names of the cluster and namespaces using a hash"
   echo "  --help|-h: Show this help message"
+  echo "  --continue|-c: Continue processing from the last saved state. Used in the case that the script was interrupted."
   exit 1
 }
 
