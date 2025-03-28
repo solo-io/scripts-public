@@ -23,7 +23,6 @@ help() {
   echo "  --hide-names|-hn: Hide the names of the cluster and namespaces using a hash."
   echo "  --help|-h: Show this help message."
   echo "  --continue|-c: If the script was interrupted, continue processing from the last saved state."
-  exit 1
 }
 
 log_info() {
@@ -37,6 +36,45 @@ log_warn() {
 log_error() {
   echo "${ERROR}[ERROR] $1${RESET}"
 }
+
+OBFUSCATE_NAMES=false
+CONTINUE_PROCESSING=false
+
+# check for optional flags
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --hide-names|-hn)
+      OBFUSCATE_NAMES=true
+      ;;
+    --help|-h)
+      help
+      exit 0
+      ;;
+    --continue|-c)
+      CONTINUE_PROCESSING=true
+      ;;
+    *)
+      log_error "Unknown argument: $1"
+      help
+      exit 1
+      ;;
+  esac
+  shift
+done
+
+# verify environment has expected tools
+expected_commands="kubectl jq wc awk sha256sum bc"
+missing_commands=""
+for cmd in $expected_commands; do
+  if ! command -v "$cmd" > /dev/null; then
+    missing_commands="$missing_commands $cmd"
+  fi
+done
+
+if [ -n "$missing_commands" ]; then
+  log_error "The following commands are required but not found in the current environment: $missing_commands"
+  exit 1
+fi
 
 # Function to draw progress bar
 draw_progress_bar() {
@@ -75,51 +113,15 @@ if [ -z "$CONTEXT" ]; then
   fi
 fi
 
-OBFUSCATE_NAMES=false
-CONTINUE_PROCESSING=false
-
-# check for optional flags
-while [ $# -gt 0 ]; do
-  case "$1" in
-    --hide-names|-hn)
-      OBFUSCATE_NAMES=true
-      ;;
-    --help|-h)
-      help
-      ;;
-    --continue|-c)
-      CONTINUE_PROCESSING=true
-      ;;
-    *)
-      log_error "Unknown argument: $1"
-      exit 1
-      ;;
-  esac
-  shift
-done
-
-# verify environment has expected tools
-expected_commands="kubectl jq wc awk sha256sum bc"
-missing_commands=""
-for cmd in $expected_commands; do
-  if ! command -v "$cmd" > /dev/null; then
-    missing_commands="$missing_commands $cmd"
-  fi
-done
-
-if [ -n "$missing_commands" ]; then
-  log_error "The following commands are required but not found in the current environment: $missing_commands"
-  exit 1
-fi
-
 # if not continuing, (re)initialize the cluster_info.json file, else keep the existing file
 if [ "$CONTINUE_PROCESSING" = false ]; then
   echo '{"name": "", "namespaces": {}, "nodes": {}, "has_metrics": false}' > cluster_info.json
 else
   # check if cluster_info.json exists when continuing
   if [ ! -f "cluster_info.json" ]; then
-    log_error "cluster_info.json does not exist to continue processing"
-    exit 1
+    log_warn "cluster_info.json does not exist to continue processing. Starting fresh."
+    CONTINUE_PROCESSING=false
+    echo '{"name": "", "namespaces": {}, "nodes": {}, "has_metrics": false}' > cluster_info.json
   fi
 fi
 
@@ -157,16 +159,17 @@ process_node_data() {
   _process_node_data_ctx="$2"
   _process_node_data_has_metrics="$3"
 
-  # check if continuing, if so, skip if node already exists
-  if [ "$CONTINUE_PROCESSING" = true ]; then
-    if jq -e ".nodes[\"$_process_node_data_node_name\"]" cluster_info.json > /dev/null 2>&1; then
-      return 0
-    fi
-  fi
-
+  # Apply name obfuscation if needed
   _process_node_data_out_node_name=$_process_node_data_node_name
   if [ "$OBFUSCATE_NAMES" = true ]; then
     _process_node_data_out_node_name=$(echo "$_process_node_data_node_name" | sha256sum | awk '{print $1}')
+  fi
+
+  # check if continuing, if so, skip if node already exists
+  if [ "$CONTINUE_PROCESSING" = true ]; then
+    if jq -e ".nodes[\"$_process_node_data_out_node_name\"]" cluster_info.json > /dev/null 2>&1; then
+      return 0
+    fi
   fi
 
   # cache node information
@@ -303,9 +306,15 @@ process_namespace_parallel() {
   _process_namespace_parallel_temp_dir="$4"
   _process_namespace_parallel_output_file="$_process_namespace_parallel_temp_dir/$_process_namespace_parallel_ns_name.json"
 
+  # Apply name obfuscation if needed
+  _process_namespace_parallel_out_ns_name=$_process_namespace_parallel_ns_name
+  if [ "$OBFUSCATE_NAMES" = true ]; then
+    _process_namespace_parallel_out_ns_name=$(echo "$_process_namespace_parallel_ns_name" | sha256sum | awk '{print $1}')
+  fi
+
   # check if continuing, if so, skip if namespace already exists
   if [ "$CONTINUE_PROCESSING" = true ]; then
-    if jq -e ".namespaces[\"$_process_namespace_parallel_ns_name\"]" cluster_info.json > /dev/null 2>&1; then
+    if jq -e ".namespaces[\"$_process_namespace_parallel_out_ns_name\"]" cluster_info.json > /dev/null 2>&1; then
       return 0
     fi
   fi
