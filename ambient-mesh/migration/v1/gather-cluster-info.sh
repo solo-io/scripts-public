@@ -2,10 +2,9 @@
 # Example: CONTEXT="mycluster" ./gather-cluster-info.sh [--hide-names|-hn] [--continue|-c] [--help|-h]
 
 #######################################################################
-# This script collects information about the resources in a Kubernetes context.
-# It is v1 of the script used to get minimal information about the cluster used for v1(?)
-# of the backend which is a generalized overview, without specific details (getting region
-# information, specific _used_ instance cost, etc.)
+# This script gathers only minimal information about the cluster
+# for a generalized overview of its resources,
+# without gathering specific details such as the region, instance cost, etc.
 #######################################################################
 
 # log colors
@@ -21,9 +20,9 @@ CURRENT_NAMESPACE=0
 
 help() {
   echo "Usage: $0 [--hide-names|-hn] [--help|-h] [--continue|-c]"
-  echo "  --hide-names|-hn: Hide the names of the cluster and namespaces using a hash"
-  echo "  --help|-h: Show this help message"
-  echo "  --continue|-c: Continue processing from the last saved state. Used in the case that the script was interrupted."
+  echo "  --hide-names|-hn: Hide the names of the cluster and namespaces using a hash."
+  echo "  --help|-h: Show this help message."
+  echo "  --continue|-c: If the script was interrupted, continue processing from the last saved state."
   exit 1
 }
 
