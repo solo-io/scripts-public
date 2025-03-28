@@ -295,8 +295,12 @@ if ! [ -d "$TEMP_DIR" ]; then
   exit 1
 fi
 
-# Setup cleanup trap
-trap 'rm -rf "$TEMP_DIR"' EXIT
+# Convert to absolute path for maximum safety
+TEMP_DIR=$(cd "$TEMP_DIR" && pwd)
+log_info "Using temporary directory: $TEMP_DIR"
+
+# some small safety checks before doing rm -rf on the temp directory
+trap '[ -n "$TEMP_DIR" ] && [ -d "$TEMP_DIR" ] && rm -rf "$TEMP_DIR"' EXIT
 
 # Function to process a namespace and saves to a temporary file
 process_namespace_parallel() {
