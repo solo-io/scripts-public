@@ -597,25 +597,23 @@ else
   TOTAL_NAMESPACES=$(echo "$namespaces" | wc -l)
   update_progress
 
-  # Process each namespace in parallel with controlled concurrency
-  running=0
+  # Process each namespace in parallel with controlled concurrency for portability (because `wait -n` is not supported on all platforms)
+  counter=0
   touch "$TEMP_DIR/warnings.log"
 
   while IFS= read -r ns_name; do
-    # Wait if we've reached the maximum number of parallel processes
-    while [ "$running" -ge "$MAX_PARALLEL" ]; do
-      # Wait for a child process to finish
-      wait -n 2>/dev/null || true
-      # Count remaining background jobs
-      running=$(jobs -p | wc -l)
-    done
-
     process_namespace_parallel "$ns_name" "$CONTEXT" "$has_metrics" "$TEMP_DIR" &
-    running=$((running + 1))
-    
-    # For a more accurate progress bar, increment after each job is launched
+    counter=$((counter + 1))
+  
     CURRENT_NAMESPACE=$((CURRENT_NAMESPACE + 1))
     update_progress
+  
+    # Once the maximum number of parallel jobs are launched, manually wait for them to finish
+    # this is noticably slower than using `wait -n` but it is more portable
+    if [ "$counter" -ge "$MAX_PARALLEL" ]; then
+      wait
+      counter=0
+    fi
   done << EOF
 $namespaces
 EOF
