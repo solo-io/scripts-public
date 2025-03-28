@@ -40,30 +40,30 @@ log_error() {
 
 # Function to draw progress bar
 draw_progress_bar() {
-  local percent=$1
-  local width=$2
-  local filled=$(printf "%.0f" $(echo "$percent * $width / 100" | bc -l))
-  local empty=$((width - filled))
+  _draw_progress_bar_percent="$1"
+  _draw_progress_bar_width="$2"
+  _draw_progress_bar_filled=$(printf "%.0f" "$(echo "$_draw_progress_bar_percent * $_draw_progress_bar_width / 100" | bc -l)")
+  _draw_progress_bar_empty=$((_draw_progress_bar_width - _draw_progress_bar_filled))
   
   # Clear the current line first
   printf "\r\033[K"
   printf "["
-  printf "%${filled}s" | tr ' ' '#'
-  printf "%${empty}s" | tr ' ' '-'
-  printf "] %.1f%%" "$percent"
+  printf "%${_draw_progress_bar_filled}s" | tr ' ' '#'
+  printf "%${_draw_progress_bar_empty}s" | tr ' ' '-'
+  printf "] %.1f%%" "$_draw_progress_bar_percent"
 }
 
 # Function to update progress
 update_progress() {
-  local progress=0
-  [ $TOTAL_NAMESPACES -gt 0 ] && progress=$(echo "scale=2; $CURRENT_NAMESPACE * 100 / $TOTAL_NAMESPACES" | bc)
+  _update_progress_progress=0
+  [ "$TOTAL_NAMESPACES" -gt 0 ] && _update_progress_progress=$(echo "scale=2; $CURRENT_NAMESPACE * 100 / $TOTAL_NAMESPACES" | bc)
   
   # Ensure we don't exceed 100%
-  if [ $(echo "$progress > 100" | bc -l) -eq 1 ]; then
-    progress=100
+  if [ "$(echo "$_update_progress_progress > 100" | bc -l)" -eq 1 ]; then
+    _update_progress_progress=100
   fi
   
-  draw_progress_bar $progress $PROGRESS_WIDTH
+  draw_progress_bar "$_update_progress_progress" "$PROGRESS_WIDTH"
 }
 
 # Check for CONTEXT or use current context
@@ -153,58 +153,76 @@ parse_cpu_cmd='def parse_cpu:
   end;'
 
 process_node_data() {
-  local node_name="$1"
-  local ctx="$2"
-  local has_metrics="$3"
+  _process_node_data_node_name="$1"
+  _process_node_data_ctx="$2"
+  _process_node_data_has_metrics="$3"
 
   # check if continuing, if so, skip if node already exists
   if [ "$CONTINUE_PROCESSING" = true ]; then
-    if jq -e ".nodes[\"$node_name\"]" cluster_info.json > /dev/null 2>&1; then
+    if jq -e ".nodes[\"$_process_node_data_node_name\"]" cluster_info.json > /dev/null 2>&1; then
       return 0
     fi
   fi
 
-  out_node_name=$node_name
+  _process_node_data_out_node_name=$_process_node_data_node_name
   if [ "$OBFUSCATE_NAMES" = true ]; then
-    out_node_name=$(echo "$node_name" | sha256sum | awk '{print $1}')
+    _process_node_data_out_node_name=$(echo "$_process_node_data_node_name" | sha256sum | awk '{print $1}')
   fi
 
   # cache node information
-  local node_info=$(kubectl --context="$ctx" get node "$node_name" -o json)
+  _process_node_data_node_info=$(kubectl --context="$_process_node_data_ctx" get node "$_process_node_data_node_name" -o json)
   
   # get the instance type, region, and zone
-  local instance_type=$(jq -r '.metadata.labels["kubernetes.io/instance-type"] // "unknown"' <<< "$node_info")
-  local region=$(jq -r '.metadata.labels["topology.kubernetes.io/region"] // "unknown"' <<< "$node_info")
-  local zone=$(jq -r '.metadata.labels["topology.kubernetes.io/zone"] // "unknown"' <<< "$node_info")
+  _process_node_data_instance_type=$(jq -r '.metadata.labels["kubernetes.io/instance-type"] // "unknown"' << EOF
+$_process_node_data_node_info
+EOF
+)
+  _process_node_data_region=$(jq -r '.metadata.labels["topology.kubernetes.io/region"] // "unknown"' << EOF
+$_process_node_data_node_info
+EOF
+)
+  _process_node_data_zone=$(jq -r '.metadata.labels["topology.kubernetes.io/zone"] // "unknown"' << EOF
+$_process_node_data_node_info
+EOF
+)
 
   # get the node cpu and memory capacity
-  local node_cpu_capacity=$(jq -r '.status.capacity.cpu // "0"' <<< "$node_info")
-  local node_mem_capacity=$(jq -r '.status.capacity.memory // "0"' <<< "$node_info")
+  _process_node_data_node_cpu_capacity=$(jq -r '.status.capacity.cpu // "0"' << EOF
+$_process_node_data_node_info
+EOF
+)
+  _process_node_data_node_mem_capacity=$(jq -r '.status.capacity.memory // "0"' << EOF
+$_process_node_data_node_info
+EOF
+)
 
   # Parse CPU and memory values by converting to string first
-  local parsed_cpu_capacity=$(echo "\"$node_cpu_capacity\"" | jq "${parse_cpu_cmd} parse_cpu // 0")
-  local parsed_mem_capacity=$(echo "\"$node_mem_capacity\"" | jq "${parse_mem_cmd} parse_mem / (1024 * 1024 * 1024) // 0")
+  _process_node_data_parsed_cpu_capacity=$(echo "\"$_process_node_data_node_cpu_capacity\"" | jq "${parse_cpu_cmd} parse_cpu // 0")
+  _process_node_data_parsed_mem_capacity=$(echo "\"$_process_node_data_node_mem_capacity\"" | jq "${parse_mem_cmd} parse_mem / (1024 * 1024 * 1024) // 0")
 
   # Initialize usage values
-  local parsed_cpu_usage=0
-  local parsed_mem_usage=0
+  _process_node_data_parsed_cpu_usage=0
+  _process_node_data_parsed_mem_usage=0
 
-  if [ "$has_metrics" = true ]; then
-    local node_metrics_info=$(kubectl --context="$ctx" get nodes.metrics "$node_name" -o json)
-    local node_cpu_usage=$(jq -r '.usage.cpu // "0"' <<< "$node_metrics_info")
-    local node_mem_usage=$(jq -r '.usage.memory // "0"' <<< "$node_metrics_info")
+  if [ "$_process_node_data_has_metrics" = true ]; then
+    _process_node_data_node_metrics_info=$(kubectl --context="$_process_node_data_ctx" get nodes.metrics "$_process_node_data_node_name" -o json)
+    _process_node_data_node_cpu_usage=$(jq -r '.usage.cpu // "0"' << EOF
+$_process_node_data_node_metrics_info
+EOF
+)
+    _process_node_data_node_mem_usage=$(jq -r '.usage.memory // "0"' << EOF
+$_process_node_data_node_metrics_info
+EOF
+)
 
     # Parse usage values by converting to string first
-    parsed_cpu_usage=$(echo "\"$node_cpu_usage\"" | jq "${parse_cpu_cmd} parse_cpu // 0")
-    parsed_mem_usage=$(echo "\"$node_mem_usage\"" | jq "${parse_mem_cmd} parse_mem / (1024 * 1024 * 1024) // 0")
+    _process_node_data_parsed_cpu_usage=$(echo "\"$_process_node_data_node_cpu_usage\"" | jq "${parse_cpu_cmd} parse_cpu // 0")
+    _process_node_data_parsed_mem_usage=$(echo "\"$_process_node_data_node_mem_usage\"" | jq "${parse_mem_cmd} parse_mem / (1024 * 1024 * 1024) // 0")
   fi
 
-  # Construct the final JSON object with error checking
-  local node_data
-  local jq_filter
-
   # Build the base jq filter
-  jq_filter='{
+  # shellcheck disable=SC2016
+  _process_node_data_jq_filter='{
     instance_type: $instance_type,
     region: $region,
     zone: $zone,
@@ -217,8 +235,9 @@ process_node_data() {
   }'
 
   # If metrics are available, add actual usage to the filter
-  if [ "$has_metrics" = true ]; then
-    jq_filter='{
+  # shellcheck disable=SC2016
+  if [ "$_process_node_data_has_metrics" = true ]; then
+    _process_node_data_jq_filter='{
       instance_type: $instance_type,
       region: $region,
       zone: $zone,
@@ -236,29 +255,24 @@ process_node_data() {
   fi
 
   # Use jq to construct the node data object
-  node_data=$(jq -n \
-    --arg instance_type "$instance_type" \
-    --arg region "$region" \
-    --arg zone "$zone" \
-    --argjson cpu_capacity "$parsed_cpu_capacity" \
-    --argjson mem_capacity "$parsed_mem_capacity" \
-    --argjson cpu_usage "$parsed_cpu_usage" \
-    --argjson mem_usage "$parsed_mem_usage" \
-    "$jq_filter")
+  _process_node_data_node_data=$(jq -n \
+    --arg instance_type "$_process_node_data_instance_type" \
+    --arg region "$_process_node_data_region" \
+    --arg zone "$_process_node_data_zone" \
+    --argjson cpu_capacity "$_process_node_data_parsed_cpu_capacity" \
+    --argjson mem_capacity "$_process_node_data_parsed_mem_capacity" \
+    --argjson cpu_usage "$_process_node_data_parsed_cpu_usage" \
+    --argjson mem_usage "$_process_node_data_parsed_mem_usage" \
+    "$_process_node_data_jq_filter")
 
-  if [ $? -ne 0 ]; then
-    log_warn "Failed to construct node data JSON for node $node_name"
+  if [ -z "$_process_node_data_node_data" ]; then
+    log_warn "Empty node data generated for node $_process_node_data_node_name"
     return 1
   fi
 
   # Add node data to the main JSON file
-  if [ -n "$node_data" ]; then
-    jq --arg node "$out_node_name" --argjson data "$node_data" \
-      '.nodes[$node] = $data' cluster_info.json > tmp.json && mv tmp.json cluster_info.json
-  else
-    log_warn "Empty node data generated for node $node_name"
-    return 1
-  fi
+  jq --arg node "$_process_node_data_out_node_name" --argjson data "$_process_node_data_node_data" \
+    '.nodes[$node] = $data' cluster_info.json > tmp.json && mv tmp.json cluster_info.json
 }
 
 # Check if system supports parallel processing
@@ -273,7 +287,7 @@ fi
 
 # temporary directory to store namespace processing results
 TEMP_DIR=$(mktemp -d)
-if [ $? -ne 0 ]; then
+if ! [ -d "$TEMP_DIR" ]; then
   log_error "Failed to create temporary directory for parallel processing"
   exit 1
 fi
@@ -283,94 +297,125 @@ trap 'rm -rf "$TEMP_DIR"' EXIT
 
 # Function to process a namespace and saves to a temporary file
 process_namespace_parallel() {
-  local ns_name="$1"
-  local ctx="$2"
-  local has_metrics="$3"
-  local temp_dir="$4"
-  local output_file="$temp_dir/$ns_name.json"
+  _process_namespace_parallel_ns_name="$1"
+  _process_namespace_parallel_ctx="$2"
+  _process_namespace_parallel_has_metrics="$3"
+  _process_namespace_parallel_temp_dir="$4"
+  _process_namespace_parallel_output_file="$_process_namespace_parallel_temp_dir/$_process_namespace_parallel_ns_name.json"
 
   # check if continuing, if so, skip if namespace already exists
   if [ "$CONTINUE_PROCESSING" = true ]; then
-    if jq -e ".namespaces[\"$ns_name\"]" cluster_info.json > /dev/null 2>&1; then
+    if jq -e ".namespaces[\"$_process_namespace_parallel_ns_name\"]" cluster_info.json > /dev/null 2>&1; then
       return 0
     fi
   fi
   
   # Check if namespace has Istio injection
-  is_istio_injected=$(kubectl --context="$ctx" get ns "$ns_name" -o json | \
+  _process_namespace_parallel_is_istio_injected=$(kubectl --context="$_process_namespace_parallel_ctx" get ns "$_process_namespace_parallel_ns_name" -o json | \
     jq -r '(.metadata.labels["istio-injection"] == "enabled") or (.metadata.labels["istio.io/rev"] != null)')
   
-  out_ns_name=$ns_name
+  _process_namespace_parallel_out_ns_name=$_process_namespace_parallel_ns_name
   if [ "$OBFUSCATE_NAMES" = true ]; then
-    out_ns_name=$(echo "$ns_name" | sha256sum | awk '{print $1}')
+    _process_namespace_parallel_out_ns_name=$(echo "$_process_namespace_parallel_ns_name" | sha256sum | awk '{print $1}')
   fi
 
-  pods_json=$(kubectl --context="$ctx" -n "$ns_name" get pods -o json 2>/dev/null | jq -c '.items')
-  if [ -z "$pods_json" ] || [ "$pods_json" = "null" ]; then
-    echo "{\"status\": \"error\", \"message\": \"No pods found for namespace $ns_name\"}" > "$output_file"
+  _process_namespace_parallel_pods_json=$(kubectl --context="$_process_namespace_parallel_ctx" -n "$_process_namespace_parallel_ns_name" get pods -o json 2>/dev/null | jq -c '.items')
+  if [ -z "$_process_namespace_parallel_pods_json" ] || [ "$_process_namespace_parallel_pods_json" = "null" ]; then
+    echo "{\"status\": \"error\", \"message\": \"No pods found for namespace $_process_namespace_parallel_ns_name\"}" > "$_process_namespace_parallel_output_file"
     return 1
   fi
 
-  if [ "$has_metrics" = true ]; then
-    pods_json_metrics=$(kubectl --context="$ctx" -n "$ns_name" get pods.metrics -o json 2>/dev/null | jq -c '.items')
-    if [ -z "$pods_json_metrics" ] || [ "$pods_json_metrics" = "null" ]; then
-      echo "No metrics found for pods in namespace $ns_name" >> "$temp_dir/warnings.log"
+  if [ "$_process_namespace_parallel_has_metrics" = true ]; then
+    _process_namespace_parallel_pods_json_metrics=$(kubectl --context="$_process_namespace_parallel_ctx" -n "$_process_namespace_parallel_ns_name" get pods.metrics -o json 2>/dev/null | jq -c '.items')
+    if [ -z "$_process_namespace_parallel_pods_json_metrics" ] || [ "$_process_namespace_parallel_pods_json_metrics" = "null" ]; then
+      echo "No metrics found for pods in namespace $_process_namespace_parallel_ns_name" >> "$_process_namespace_parallel_temp_dir/warnings.log"
     fi
   fi
 
   # Process metrics in multiple steps to ensure proper JSON handling
-  local regular_containers=0
-  local istio_containers=0
-  local pod_count=0
-  local regular_cpu=0
-  local regular_mem=0
-  local istio_cpu=0
-  local istio_mem=0
+  _process_namespace_parallel_regular_containers=0
+  _process_namespace_parallel_istio_containers=0
+  _process_namespace_parallel_pod_count=0
+  _process_namespace_parallel_regular_cpu=0
+  _process_namespace_parallel_regular_mem=0
+  _process_namespace_parallel_istio_cpu=0
+  _process_namespace_parallel_istio_mem=0
   # actual usage based on metrics API, only used if metrics API is available
-  local regular_cpu_actual=0
-  local regular_mem_actual=0
-  local istio_cpu_actual=0
-  local istio_mem_actual=0
+  _process_namespace_parallel_regular_cpu_actual=0
+  _process_namespace_parallel_regular_mem_actual=0
+  _process_namespace_parallel_istio_cpu_actual=0
+  _process_namespace_parallel_istio_mem_actual=0
 
-  pod_count=$(jq -r 'length' <<< "$pods_json")
-  if [ $? -ne 0 ] || [ -z "$pod_count" ]; then
-    echo "{\"status\": \"error\", \"message\": \"Failed to get pod count for namespace $ns_name\"}" > "$output_file"
+  _process_namespace_parallel_pod_count=$(jq -r 'length' << EOF
+$_process_namespace_parallel_pods_json
+EOF
+)
+  if [ -z "$_process_namespace_parallel_pod_count" ]; then
+    echo "{\"status\": \"error\", \"message\": \"Failed to get pod count for namespace $_process_namespace_parallel_ns_name\"}" > "$_process_namespace_parallel_output_file"
     return 1
   fi
 
-  regular_containers=$(jq -r '[.[] | .spec.containers[]? | select(.name != "istio-proxy")] | length' <<< "$pods_json")
-  istio_containers=$(jq -r '[.[] | .spec.containers[]? | select(.name == "istio-proxy")] | length' <<< "$pods_json")
+  _process_namespace_parallel_regular_containers=$(jq -r '[.[] | .spec.containers[]? | select(.name != "istio-proxy")] | length' << EOF
+$_process_namespace_parallel_pods_json
+EOF
+)
+  _process_namespace_parallel_istio_containers=$(jq -r '[.[] | .spec.containers[]? | select(.name == "istio-proxy")] | length' << EOF
+$_process_namespace_parallel_pods_json
+EOF
+)
 
   # Regular containers resources
-  if [ "$regular_containers" -gt 0 ]; then
-    regular_cpu=$(jq "${parse_cpu_cmd} ([.[] | .spec.containers[]? | select(.name != \"istio-proxy\") | .resources.requests.cpu? | select(. != null) | parse_cpu] | add // 0)" <<< "$pods_json")
-    regular_mem=$(jq "${parse_mem_cmd} ([.[] | .spec.containers[]? | select(.name != \"istio-proxy\") | .resources.requests.memory? | select(. != null) | parse_mem] | add // 0) / (1024 * 1024 * 1024)" <<< "$pods_json")
+  if [ "$_process_namespace_parallel_regular_containers" -gt 0 ]; then
+    _process_namespace_parallel_regular_cpu=$(jq "${parse_cpu_cmd} ([.[] | .spec.containers[]? | select(.name != \"istio-proxy\") | .resources.requests.cpu? | select(. != null) | parse_cpu] | add // 0)" << EOF
+$_process_namespace_parallel_pods_json
+EOF
+)
+    _process_namespace_parallel_regular_mem=$(jq "${parse_mem_cmd} ([.[] | .spec.containers[]? | select(.name != \"istio-proxy\") | .resources.requests.memory? | select(. != null) | parse_mem] | add // 0) / (1024 * 1024 * 1024)" << EOF
+$_process_namespace_parallel_pods_json
+EOF
+)
     
     # Get actual usage if metrics API is available
-    if [ "$has_metrics" = true ] && [ -n "$pods_json_metrics" ]; then
-      regular_cpu_actual=$(jq "${parse_cpu_cmd} ([.[] | .containers[]? | select(.name != \"istio-proxy\") | .usage.cpu? | select(. != null) | parse_cpu] | add // 0)" <<< "$pods_json_metrics")
-      regular_mem_actual=$(jq "${parse_mem_cmd} ([.[] | .containers[]? | select(.name != \"istio-proxy\") | .usage.memory? | select(. != null) | parse_mem] | add // 0) / (1024 * 1024 * 1024)" <<< "$pods_json_metrics")
+    if [ "$_process_namespace_parallel_has_metrics" = true ] && [ -n "$_process_namespace_parallel_pods_json_metrics" ]; then
+      _process_namespace_parallel_regular_cpu_actual=$(jq "${parse_cpu_cmd} ([.[] | .containers[]? | select(.name != \"istio-proxy\") | .usage.cpu? | select(. != null) | parse_cpu] | add // 0)" << EOF
+$_process_namespace_parallel_pods_json_metrics
+EOF
+)
+      _process_namespace_parallel_regular_mem_actual=$(jq "${parse_mem_cmd} ([.[] | .containers[]? | select(.name != \"istio-proxy\") | .usage.memory? | select(. != null) | parse_mem] | add // 0) / (1024 * 1024 * 1024)" << EOF
+$_process_namespace_parallel_pods_json_metrics
+EOF
+)
     fi
   fi
 
   # Istio containers resources (only if namespace has Istio injection)
-  if [ "$is_istio_injected" = "true" ] && [ "$istio_containers" -gt 0 ]; then
-    istio_cpu=$(jq "${parse_cpu_cmd} ([.[] | .spec.containers[]? | select(.name == \"istio-proxy\") | .resources.requests.cpu? | select(. != null) | parse_cpu] | add // 0)" <<< "$pods_json")
-    istio_mem=$(jq "${parse_mem_cmd} ([.[] | .spec.containers[]? | select(.name == \"istio-proxy\") | .resources.requests.memory? | select(. != null) | parse_mem] | add // 0) / (1024 * 1024 * 1024)" <<< "$pods_json")
+  if [ "$_process_namespace_parallel_is_istio_injected" = "true" ] && [ "$_process_namespace_parallel_istio_containers" -gt 0 ]; then
+    _process_namespace_parallel_istio_cpu=$(jq "${parse_cpu_cmd} ([.[] | .spec.containers[]? | select(.name == \"istio-proxy\") | .resources.requests.cpu? | select(. != null) | parse_cpu] | add // 0)" << EOF
+$_process_namespace_parallel_pods_json
+EOF
+)
+    _process_namespace_parallel_istio_mem=$(jq "${parse_mem_cmd} ([.[] | .spec.containers[]? | select(.name == \"istio-proxy\") | .resources.requests.memory? | select(. != null) | parse_mem] | add // 0) / (1024 * 1024 * 1024)" << EOF
+$_process_namespace_parallel_pods_json
+EOF
+)
     
     # Get actual usage if metrics API is available
-    if [ "$has_metrics" = true ] && [ -n "$pods_json_metrics" ]; then
-      istio_cpu_actual=$(jq "${parse_cpu_cmd} ([.[] | .containers[]? | select(.name == \"istio-proxy\") | .usage.cpu? | select(. != null) | parse_cpu] | add // 0)" <<< "$pods_json_metrics")
-      istio_mem_actual=$(jq "${parse_mem_cmd} ([.[] | .containers[]? | select(.name == \"istio-proxy\") | .usage.memory? | select(. != null) | parse_mem] | add // 0) / (1024 * 1024 * 1024)" <<< "$pods_json_metrics")
+    if [ "$_process_namespace_parallel_has_metrics" = true ] && [ -n "$_process_namespace_parallel_pods_json_metrics" ]; then
+      _process_namespace_parallel_istio_cpu_actual=$(jq "${parse_cpu_cmd} ([.[] | .containers[]? | select(.name == \"istio-proxy\") | .usage.cpu? | select(. != null) | parse_cpu] | add // 0)" << EOF
+$_process_namespace_parallel_pods_json_metrics
+EOF
+)
+      _process_namespace_parallel_istio_mem_actual=$(jq "${parse_mem_cmd} ([.[] | .containers[]? | select(.name == \"istio-proxy\") | .usage.memory? | select(. != null) | parse_mem] | add // 0) / (1024 * 1024 * 1024)" << EOF
+$_process_namespace_parallel_pods_json_metrics
+EOF
+)
     fi
   fi
 
   # Construct the final JSON object with error checking
-  local metrics
-  local jq_filter
-
   # Build the base jq filter
-  jq_filter='{
+  # shellcheck disable=SC2016
+  _process_namespace_parallel_jq_filter='{
     ns_name: $ns_name,
     out_ns_name: $out_ns_name,
     pods: $pods,
@@ -387,8 +432,9 @@ process_namespace_parallel() {
   }'
 
   # If namespace has Istio injection, add Istio resources
-  if [ "$is_istio_injected" = "true" ]; then
-    jq_filter='{
+  # shellcheck disable=SC2016
+  if [ "$_process_namespace_parallel_is_istio_injected" = "true" ]; then
+    _process_namespace_parallel_jq_filter='{
       ns_name: $ns_name,
       out_ns_name: $out_ns_name,
       pods: $pods,
@@ -413,9 +459,10 @@ process_namespace_parallel() {
   fi
 
   # If metrics are available, add actual usage to the filter
-  if [ "$has_metrics" = true ]; then
-    if [ "$is_istio_injected" = "true" ]; then
-      jq_filter='{
+  # shellcheck disable=SC2016
+  if [ "$_process_namespace_parallel_has_metrics" = true ]; then
+    if [ "$_process_namespace_parallel_is_istio_injected" = "true" ]; then
+      _process_namespace_parallel_jq_filter='{
         ns_name: $ns_name,
         out_ns_name: $out_ns_name,
         pods: $pods,
@@ -446,7 +493,7 @@ process_namespace_parallel() {
         }
       }'
     else
-      jq_filter='{
+      _process_namespace_parallel_jq_filter='{
         ns_name: $ns_name,
         out_ns_name: $out_ns_name,
         pods: $pods,
@@ -470,26 +517,24 @@ process_namespace_parallel() {
 
   # Use jq to construct the metrics object and save to temporary file
   jq -n \
-    --arg ns_name "$ns_name" \
-    --arg out_ns_name "$out_ns_name" \
-    --argjson pods "$pod_count" \
-    --argjson is_istio_injected "$is_istio_injected" \
-    --argjson reg_containers "$regular_containers" \
-    --argjson reg_cpu "$regular_cpu" \
-    --argjson reg_mem "$regular_mem" \
-    --argjson reg_cpu_actual "$regular_cpu_actual" \
-    --argjson reg_mem_actual "$regular_mem_actual" \
-    --argjson istio_containers "$istio_containers" \
-    --argjson istio_cpu "$istio_cpu" \
-    --argjson istio_mem "$istio_mem" \
-    --argjson istio_cpu_actual "$istio_cpu_actual" \
-    --argjson istio_mem_actual "$istio_mem_actual" \
-    "$jq_filter" > "$output_file"
-
-  if [ $? -ne 0 ]; then
-    echo "{\"status\": \"error\", \"message\": \"Failed to construct metrics JSON for namespace $ns_name\"}" > "$output_file"
-    return 1
-  fi
+    --arg ns_name "$_process_namespace_parallel_ns_name" \
+    --arg out_ns_name "$_process_namespace_parallel_out_ns_name" \
+    --argjson pods "$_process_namespace_parallel_pod_count" \
+    --argjson is_istio_injected "$_process_namespace_parallel_is_istio_injected" \
+    --argjson reg_containers "$_process_namespace_parallel_regular_containers" \
+    --argjson reg_cpu "$_process_namespace_parallel_regular_cpu" \
+    --argjson reg_mem "$_process_namespace_parallel_regular_mem" \
+    --argjson reg_cpu_actual "$_process_namespace_parallel_regular_cpu_actual" \
+    --argjson reg_mem_actual "$_process_namespace_parallel_regular_mem_actual" \
+    --argjson istio_containers "$_process_namespace_parallel_istio_containers" \
+    --argjson istio_cpu "$_process_namespace_parallel_istio_cpu" \
+    --argjson istio_mem "$_process_namespace_parallel_istio_mem" \
+    --argjson istio_cpu_actual "$_process_namespace_parallel_istio_cpu_actual" \
+    --argjson istio_mem_actual "$_process_namespace_parallel_istio_mem_actual" \
+    "$_process_namespace_parallel_jq_filter" > "$_process_namespace_parallel_output_file" || {
+      echo "{\"status\": \"error\", \"message\": \"Failed to construct metrics JSON for namespace $_process_namespace_parallel_ns_name\"}" > "$_process_namespace_parallel_output_file"
+      return 1
+    }
 }
 
 # Get count of namespaces
@@ -545,7 +590,7 @@ else
 
   while IFS= read -r ns_name; do
     # Wait if we've reached the maximum number of parallel processes
-    while [ $running -ge $MAX_PARALLEL ]; do
+    while [ "$running" -ge "$MAX_PARALLEL" ]; do
       # Wait for a child process to finish
       wait -n 2>/dev/null || true
       # Count remaining background jobs
@@ -558,7 +603,9 @@ else
     # For a more accurate progress bar, increment after each job is launched
     CURRENT_NAMESPACE=$((CURRENT_NAMESPACE + 1))
     update_progress
-  done <<< "$namespaces"
+  done << EOF
+$namespaces
+EOF
 
   # Wait for all background jobs to complete
   wait
