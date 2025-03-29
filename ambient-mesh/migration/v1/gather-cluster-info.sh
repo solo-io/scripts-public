@@ -176,15 +176,18 @@ process_node_data() {
   _process_node_data_node_info=$(kubectl --context="$_process_node_data_ctx" get node "$_process_node_data_node_name" -o json)
   
   # get the instance type, region, and zone
-  _process_node_data_instance_type=$(jq -r '.metadata.labels["kubernetes.io/instance-type"] // "unknown"' << EOF
+  # beta.kubernetes.io/instance-type (1.16-) and node.kubernetes.io/instance-type (1.17+)
+  _process_node_data_instance_type=$(jq -r '.metadata.labels["node.kubernetes.io/instance-type"] // .metadata.labels["beta.kubernetes.io/instance-type"] // "unknown"' << EOF
 $_process_node_data_node_info
 EOF
 )
-  _process_node_data_region=$(jq -r '.metadata.labels["topology.kubernetes.io/region"] // "unknown"' << EOF
+  # failure-domain.beta.kubernetes.io/region (1.16-) and topology.kubernetes.io/region (1.17+)
+  _process_node_data_region=$(jq -r '.metadata.labels["topology.kubernetes.io/region"] // .metadata.labels["failure-domain.beta.kubernetes.io/region"] // "unknown"' << EOF
 $_process_node_data_node_info
 EOF
 )
-  _process_node_data_zone=$(jq -r '.metadata.labels["topology.kubernetes.io/zone"] // "unknown"' << EOF
+  # failure-domain.beta.kubernetes.io/zone (1.16-) and topology.kubernetes.io/zone (1.17+)
+  _process_node_data_zone=$(jq -r '.metadata.labels["topology.kubernetes.io/zone"] // .metadata.labels["failure-domain.beta.kubernetes.io/zone"] // "unknown"' << EOF
 $_process_node_data_node_info
 EOF
 )
