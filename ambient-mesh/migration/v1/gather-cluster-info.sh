@@ -127,28 +127,49 @@ fi
 
 # JQ functions for parsing memory and CPU
 parse_mem_cmd='def parse_mem:
-  if test("^[0-9]+Ki$") then
+  if test("^[0-9]+(\\.[0-9]+)?[eE][0-9]+$") then
+    tonumber
+  # SI units (binary format)
+  elif test("^[0-9]+(\\.[0-9]+)?Ki$") then
     (.[0:-2] | tonumber) * 1024
-  elif test("^[0-9]+Mi$") then
+  elif test("^[0-9]+(\\.[0-9]+)?Mi$") then
     (.[0:-2] | tonumber) * 1024 * 1024
-  elif test("^[0-9]+Gi$") then
+  elif test("^[0-9]+(\\.[0-9]+)?Gi$") then
     (.[0:-2] | tonumber) * 1024 * 1024 * 1024
-  elif test("^[0-9]+Ti$") then
+  elif test("^[0-9]+(\\.[0-9]+)?Ti$") then
     (.[0:-2] | tonumber) * 1024 * 1024 * 1024 * 1024
-  elif test("^[0-9]+Pi$") then
+  elif test("^[0-9]+(\\.[0-9]+)?Pi$") then
     (.[0:-2] | tonumber) * 1024 * 1024 * 1024 * 1024 * 1024
-  elif test("^[0-9]+Ei$") then
+  elif test("^[0-9]+(\\.[0-9]+)?Ei$") then
     (.[0:-2] | tonumber) * 1024 * 1024 * 1024 * 1024 * 1024 * 1024
+  # SI units (decimal format)
+  elif test("^[0-9]+(\\.[0-9]+)?k$") then
+    (.[0:-1] | tonumber) * 1000
+  elif test("^[0-9]+(\\.[0-9]+)?M$") then
+    (.[0:-1] | tonumber) * 1000 * 1000
+  elif test("^[0-9]+(\\.[0-9]+)?G$") then
+    (.[0:-1] | tonumber) * 1000 * 1000 * 1000
+  elif test("^[0-9]+(\\.[0-9]+)?T$") then
+    (.[0:-1] | tonumber) * 1000 * 1000 * 1000 * 1000
+  elif test("^[0-9]+(\\.[0-9]+)?P$") then
+    (.[0:-1] | tonumber) * 1000 * 1000 * 1000 * 1000 * 1000
+  elif test("^[0-9]+(\\.[0-9]+)?E$") then
+    (.[0:-1] | tonumber) * 1000 * 1000 * 1000 * 1000 * 1000 * 1000
+  elif test("^[0-9]+(\\.[0-9]+)?m$") then
+    (.[0:-1] | tonumber) / 1000
+  # Plain bytes without unit
   else
     tonumber
   end;'
 
 parse_cpu_cmd='def parse_cpu:
-  if test("^[0-9]+n$") then
+  if test("^[0-9]+(\\.[0-9]+)?$") then
+    tonumber
+  elif test("^[0-9]+(\\.[0-9]+)?n$") then
     (.[0:-1] | tonumber) / 1000000000
-  elif test("^[0-9]+u$") then
+  elif test("^[0-9]+(\\.[0-9]+)?u$") then
     (.[0:-1] | tonumber) / 1000000
-  elif test("^[0-9]+m$") then
+  elif test("^[0-9]+(\\.[0-9]+)?m$") then
     (.[0:-1] | tonumber) / 1000
   else
     tonumber
