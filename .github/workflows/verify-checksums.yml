@@ -1,0 +1,13 @@
+name: Verify Checksums
+on:
+  pull_request: {}
+  push:
+    branches:
+      - main
+
+jobs:
+  verify-checksums:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: make verify-checksums
